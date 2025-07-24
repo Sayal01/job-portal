@@ -18,6 +18,7 @@ Route::get('/jobs', [JobController::class, 'index']); // anyone can see job list
 Route::get('/jobs/{job}', [JobController::class, 'show']); // anyone can see job details
 Route::get('/companies', [CompanyController::class, 'index']);
 Route::get('/companies/{company}', [CompanyController::class, 'show']);
+Route::get('/departments/{id}/jobs', [JobController::class, 'getJobsByDepartment']);
 
 Route::apiResource('/departments', DepartmentController::class)
     ->only(['index', 'show']);
@@ -58,6 +59,11 @@ Route::group(["middleware" => "auth:sanctum"], function () {
     Route::post('/jobs', [JobController::class, 'store']);
     Route::put('/jobs/{job}', [JobController::class, 'update']);
     Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
+
+    // Route::get('/employer/job-stats', [ApplicationController::class, 'jobStats']);
+    Route::get('/employer/jobs/active', [JobController::class, 'activeJobs']);
+    Route::get('/employer/applications/recent', [ApplicationController::class, 'recentApplications']);
+
 
     // Apply for a job
     Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store']);

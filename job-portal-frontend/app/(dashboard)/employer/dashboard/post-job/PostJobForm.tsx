@@ -268,38 +268,15 @@ function PostJobForm({ mode }: JobFormProps) {
                                         className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
                                     >
                                         <option value="">Select level</option>
-                                        <option value="entry">Entry Level (0-2 years)</option>
-                                        <option value="mid">Mid Level (3-5 years)</option>
-                                        <option value="senior">Senior Level (6-8 years)</option>
-                                        <option value="lead">Lead/Principal (9+ years)</option>
+                                        <option value="0-2 years">Entry Level (0-2 years)</option>
+                                        <option value="2-3 years">Mid Level (3-5 years)</option>
+                                        <option value="3-5 years">Senior Level (6-8 years)</option>
+                                        <option value="6+ years">Lead/Principal (6+ years)</option>
                                         <option value="executive">Executive</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Checkboxes */}
-                        {/* <div className="flex flex-wrap items-center gap-8">
-                            <label className="flex items-center space-x-3">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.isRemote}
-                                    onChange={(e) => setFormData({ ...formData, isRemote: e.target.checked })}
-                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                />
-                                <span className="text-sm font-medium text-gray-700">Remote work available</span>
-                            </label>
-
-                            <label className="flex items-center space-x-3">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.isUrgent}
-                                    onChange={(e) => setFormData({ ...formData, isUrgent: e.target.checked })}
-                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                />
-                                <span className="text-sm font-medium text-gray-700">Urgent hiring</span>
-                            </label>
-                        </div> */}
                     </div>
                 </div>
 
@@ -537,18 +514,13 @@ function PostJobForm({ mode }: JobFormProps) {
                     <div className="px-6 py-4 border-b border-gray-200">
                         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                             <DollarSign className="h-5 w-5" />
-                            Compensation & Benefits
+                            Salary
                         </h2>
                     </div>
                     <div className="p-6 space-y-6">
 
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
-
-                            </div>
-
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Salary</label>
                                 <input
@@ -559,7 +531,6 @@ function PostJobForm({ mode }: JobFormProps) {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Maximum Salary</label>
                                 <input

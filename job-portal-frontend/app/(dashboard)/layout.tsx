@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 {/* Navbar */}
                 <header>
                     {/* <Header /> */}
-                    <DashboardHeader userType={getValidUserType(user?.role)} />
+                    {/* <DashboardHeader userType={getValidUserType(user?.role)} /> */}
                 </header>
                 {/* Page content */}
                 <main style={{ padding: "1rem", flex: 1, overflowY: "auto" }}>

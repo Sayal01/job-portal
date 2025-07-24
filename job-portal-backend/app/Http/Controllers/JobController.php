@@ -12,7 +12,14 @@ class JobController extends Controller
     public function index()
     {
         try {
-            $jobs = Job::with('company', 'department')->latest()->get();
+            $today = now()->toDateString();
+
+
+            $jobs = Job::with('company', 'department')
+                // ->whereDate('start_date', '<=', $today)
+                // ->whereDate('application_deadline', '>=', $today)
+                ->latest()
+                ->get();
             return response()->json([
                 'status' => true,
                 'jobs' => $jobs,
@@ -25,6 +32,20 @@ class JobController extends Controller
             ], 500);
         }
     }
+    public function getJobsByDepartment($id)
+    {
+        $jobs = Job::with('company', 'department')
+            ->where('department_id', $id)
+            ->latest()
+            ->get();
+
+
+        return response()->json([
+            'status' => true,
+            'jobs' => $jobs,
+        ]);
+    }
+
 
     // shows jobs owned my logged in employer
     public function myJobs()
@@ -107,6 +128,32 @@ class JobController extends Controller
     public function show(Job $job)
     {
         return $job->load('company', 'department');
+    }
+
+    public function activeJobs()
+    {
+        $employer = auth()->user()->company;
+
+        if (!$employer) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $jobs = Job::where('company_id', $employer->id)
+
+            ->withCount('applications')  // You may need to define the relation in Job model
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id' => $job->id,
+                    'title' => $job->title,
+                    'department' => $job->department->name ?? 'N/A',
+                    'applications' => $job->applications_count,
+                    'postedDate' => $job->created_at->toDateString(),
+                ];
+            });
+
+        return response()->json(['status' => true, 'data' => $jobs]);
     }
 
     // Update job post (only owner company)
@@ -257,6 +304,7 @@ class JobController extends Controller
             'message' => 'Job deleted by admin',
         ]);
     }
+
     public function recommendJobs(Request $request, JobRecommenderService $recommender)
     {
         $user = $request->user();
@@ -311,8 +359,13 @@ class JobController extends Controller
 
         // Step 7: Return top 10 jobs
         $topJobs = array_slice($recommendations, 0, 10);
-        $result = array_map(fn($rec) => $rec['job'], $topJobs);
 
+        $result = array_map(function ($rec) {
+            return [
+                'job' => $rec['job'],
+                'score' => round($rec['score'], 3),  // Round score for readability
+            ];
+        }, $topJobs);
 
         return response()->json([
             'status' => true,

@@ -143,6 +143,35 @@ class ApplicationController extends Controller
             'user' => $application->user,
         ]);
     }
+    public function recentApplications()
+    {
+        $employer = auth()->user()->company;
+
+        if (!$employer) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $applications = Application::whereHas('job', function ($q) use ($employer) {
+            $q->where('company_id', $employer->id);
+        })
+            ->with(['user.profile'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($application) {
+                return [
+                    'id' => $application->id,
+                    'applicant' => $application->user->first_name ?? 'Unknown',
+                    'position' => $application->job->title ?? 'Unknown',
+                    'appliedDate' => $application->created_at->toDateString(),
+                    'status' => $application->status,
+                    'avatar' => $application->user->profile->avatar_url ?? null,
+                ];
+            });
+
+        return response()->json(['status' => true, 'data' => $applications]);
+    }
+
 
 
 

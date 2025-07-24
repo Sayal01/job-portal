@@ -61,8 +61,8 @@ export function DashboardSidebar({ userType }: DashboardSidebarProps) {
     const items = sidebarItems[userType]
 
     return (
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
-            <nav className="p-4 space-y-2">
+        <div className="w-64 bg-white shadow-sm border-r min-h-screen space-y-3.5">
+            <nav className="p-4 space-y-3">
                 {items.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href

@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Job extends Model
 {
+    use HasFactory;  // <-- add this
     protected $fillable = [
         'title',
         'description',
         'department_id',
         'location',
         'type',
-        'experience_level',    // fixed typo here
+        'experience_level',
         'salary_min',
         'salary_max',
         'company_id',
@@ -40,5 +42,9 @@ class Job extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
     }
 }

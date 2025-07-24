@@ -1,105 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
+import { useEffect, useState } from "react"
+import axios from "axios"
+import { API_URL } from "@/lib/config"
+import {
+    Card, CardContent, CardHeader, CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Briefcase, Users, FileText, TrendingUp, Plus, Eye, MessageSquare, Calendar } from "lucide-react"
+import Cookies from "js-cookie"
+import {
+    Briefcase, Users, FileText, TrendingUp,
+    Plus, Eye, MessageSquare, Calendar
+} from "lucide-react"
 
-const jobStats = [
-    {
-        title: "Active Jobs",
-        value: "12",
-        change: "+2 this month",
-        icon: Briefcase,
-    },
-    {
-        title: "Total Applications",
-        value: "347",
-        change: "+23 this week",
-        icon: FileText,
-    },
-    {
-        title: "Candidates Hired",
-        value: "8",
-        change: "+3 this month",
-        icon: Users,
-    },
-    {
-        title: "Response Rate",
-        value: "84%",
-        change: "+5% improvement",
-        icon: TrendingUp,
-    },
-]
+// ================= Types =================
+type JobType = {
+    id: number
+    title: string
+    department: string
+    applications: number
+    views?: number
+    status?: keyof typeof statusColors
+    postedDate: string
+}
 
-const activeJobs = [
-    {
-        id: "1",
-        title: "Senior Frontend Developer",
-        department: "Engineering",
-        applications: 47,
-        status: "active",
-        postedDate: "2024-01-15",
-        views: 234,
-    },
-    {
-        id: "2",
-        title: "Product Manager",
-        department: "Product",
-        applications: 23,
-        status: "active",
-        postedDate: "2024-01-16",
-        views: 156,
-    },
-    {
-        id: "3",
-        title: "UX Designer",
-        department: "Design",
-        applications: 15,
-        status: "paused",
-        postedDate: "2024-01-14",
-        views: 89,
-    },
-]
+type ApplicationType = {
+    id: number
+    applicant: string
+    position: string
+    experience: string
+    status: keyof typeof statusColors
+    appliedDate: string
+    avatar?: string
+}
 
-const recentApplications = [
-    {
-        id: "1",
-        applicant: "Sarah Wilson",
-        position: "Senior Frontend Developer",
-        appliedDate: "2024-01-17",
-        status: "pending",
-        experience: "5+ years",
-        avatar: "/placeholder.svg?height=32&width=32",
-    },
-    {
-        id: "2",
-        applicant: "Mike Johnson",
-        position: "Product Manager",
-        appliedDate: "2024-01-16",
-        status: "reviewed",
-        experience: "3-4 years",
-        avatar: "/placeholder.svg?height=32&width=32",
-    },
-    {
-        id: "3",
-        applicant: "Emily Chen",
-        position: "UX Designer",
-        appliedDate: "2024-01-15",
-        status: "interview",
-        experience: "2-3 years",
-        avatar: "/placeholder.svg?height=32&width=32",
-    },
-    {
-        id: "4",
-        applicant: "David Brown",
-        position: "Senior Frontend Developer",
-        appliedDate: "2024-01-14",
-        status: "pending",
-        experience: "6+ years",
-        avatar: "/placeholder.svg?height=32&width=32",
-    },
-]
-
+// ================ Status Colors ================
 const statusColors = {
     active: "bg-green-100 text-green-800",
     paused: "bg-yellow-100 text-yellow-800",
@@ -111,11 +48,40 @@ const statusColors = {
 }
 
 function EmployerDashboard() {
+    const [activeJobs, setActiveJobs] = useState<JobType[]>([])
+    const [recentApplications, setRecentApplications] = useState<ApplicationType[]>([])
+    const token = Cookies.get("AuthToken")
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [jobsRes, applicationsRes] = await Promise.all([
+                    axios.get(`${API_URL}/employer/jobs/active`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }),
+                    axios.get(`${API_URL}/employer/applications/recent`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    })
+                ])
+
+                setActiveJobs(jobsRes.data.data)
+                setRecentApplications(applicationsRes.data.data)
+            } catch (err) {
+                console.error("Failed to fetch employer dashboard data:", err)
+            }
+        }
+
+        fetchData()
+    }, [])
+
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* <DashboardHeader userType="employer" /> */}
             <div className="flex">
-                {/* <DashboardSidebar userType="employer" /> */}
                 <main className="flex-1 p-8">
                     <div className="flex items-center justify-between mb-8">
                         <div>
@@ -128,25 +94,6 @@ function EmployerDashboard() {
                         </Button>
                     </div>
 
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        {jobStats.map((stat) => {
-                            const Icon = stat.icon
-                            return (
-                                <Card key={stat.title}>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-gray-600">{stat.title}</CardTitle>
-                                        <Icon className="h-4 w-4 text-gray-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">{stat.value}</div>
-                                        <p className="text-xs text-green-600 mt-1">{stat.change}</p>
-                                    </CardContent>
-                                </Card>
-                            )
-                        })}
-                    </div>
-
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Active Jobs */}
                         <Card>
@@ -155,7 +102,7 @@ function EmployerDashboard() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {activeJobs.map((job) => (
+                                    {activeJobs.slice(0, 4).map((job) => (
                                         <div key={job.id} className="p-3 border rounded-lg">
                                             <div className="flex items-start justify-between mb-2">
                                                 <div>
@@ -163,12 +110,16 @@ function EmployerDashboard() {
                                                     <p className="text-sm text-gray-600">{job.department}</p>
                                                     <p className="text-xs text-gray-500">Posted {job.postedDate}</p>
                                                 </div>
-                                                <Badge className={statusColors[job.status as keyof typeof statusColors]}>{job.status}</Badge>
+                                                {job.status && (
+                                                    <Badge className={statusColors[job.status]}>
+                                                        {job.status}
+                                                    </Badge>
+                                                )}
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4 text-sm text-gray-600">
                                                     <span>{job.applications} applications</span>
-                                                    <span>{job.views} views</span>
+                                                    <span>{job.views ?? 0} views</span>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <Button size="sm" variant="ghost">
@@ -195,11 +146,14 @@ function EmployerDashboard() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {recentApplications.map((application) => (
+                                    {recentApplications.slice(0, 4).map((application) => (
                                         <div key={application.id} className="flex items-center justify-between p-3 border rounded-lg">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={application.avatar || "/placeholder.svg"} alt={application.applicant} />
+                                                    <AvatarImage
+                                                        src={application.avatar || "/placeholder.svg"}
+                                                        alt={application.applicant}
+                                                    />
                                                     <AvatarFallback>
                                                         {application.applicant
                                                             .split(" ")
@@ -214,7 +168,7 @@ function EmployerDashboard() {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <Badge className={statusColors[application.status as keyof typeof statusColors]}>
+                                                <Badge className={statusColors[application.status]}>
                                                     {application.status}
                                                 </Badge>
                                                 <p className="text-xs text-gray-500 mt-1">{application.appliedDate}</p>
@@ -230,7 +184,7 @@ function EmployerDashboard() {
                     </div>
 
                     {/* Quick Actions */}
-                    {/* <Card className="mt-8">
+                    <Card className="mt-8">
                         <CardHeader>
                             <CardTitle>Quick Actions</CardTitle>
                         </CardHeader>
@@ -254,10 +208,11 @@ function EmployerDashboard() {
                                 </Button>
                             </div>
                         </CardContent>
-                    </Card> */}
+                    </Card>
                 </main>
             </div>
         </div>
     )
 }
-export default EmployerDashboard;
+
+export default EmployerDashboard

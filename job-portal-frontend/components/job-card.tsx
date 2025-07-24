@@ -20,14 +20,16 @@ interface Company {
 interface Job {
     id: string;
     title: string;
-    company: Company; // <-- not string!
+    company: Company;
     location: string;
     type: string;
     salary_min: string;
     salary_max: string;
     description: string;
     requirements: string[] | null;
-    postedDate: string;
+    skills: string[] | null;
+    start_date: string;
+    application_deadline: string;
 }
 
 
@@ -62,10 +64,11 @@ export function JobCard({ job }: JobCardProps) {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Clock className="h-4 w-4" />
-                                    {job.postedDate}
+                                    {job.application_deadline ? new Date(job.application_deadline).toLocaleDateString() : "N/A"}
                                 </div>
                             </div>
                         </div>
+
                     </div>
                     <Badge variant="secondary">{job.type}</Badge>
                 </div>
@@ -81,15 +84,15 @@ export function JobCard({ job }: JobCardProps) {
 
                 <div className="flex items-center justify-between">
                     <div className="flex flex-wrap gap-2">
-                        {(job.requirements || []).slice(0, 2).map((req, index) => (
+                        {(job.skills || []).slice(0, 2).map((req, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                                 {req}
                             </Badge>
                         ))}
 
-                        {job.requirements && job.requirements.length > 2 && (
+                        {job.skills && job.skills.length > 2 && (
                             <Badge variant="outline" className="text-xs">
-                                +{job.requirements.length - 2} more
+                                +{job.skills.length - 2} more
                             </Badge>
                         )}
                     </div>

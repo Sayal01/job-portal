@@ -63,7 +63,7 @@ export function Header() {
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
                         <Briefcase className="h-8 w-8 text-blue-600" />
-                        <span className="text-xl font-bold text-gray-900">JobPortal</span>
+                        <span className="text-xl font-bold text-gray-900">JobFinder</span>
                     </Link>
 
                     {/* Navigation */}
@@ -94,8 +94,8 @@ export function Header() {
                             <>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                            <Avatar className="h-8 w-8">
+                                        <Button variant="ghost" className="relative h-10 w-10 rounded-full bg-blue-300" >
+                                            <Avatar className="h-12 w-12">
                                                 <AvatarImage
                                                     src={localUser?.image ? `${API_IMG}/${localUser.image}` : "/placeholder.svg"}
                                                     alt={localUser?.first_name}

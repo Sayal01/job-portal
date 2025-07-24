@@ -32,10 +32,15 @@ type Job = {
     department: Department;
 };
 
+type JobRecommendation = {
+    job: Job;
+    score: number;
+};
+
 export default function RecommendedJobs() {
-    const [jobs, setJobs] = useState<Job[]>([]);
+    const [recommendations, setRecommendations] = useState<JobRecommendation[]>([]);
     const [loading, setLoading] = useState(true);
-    const authToken = Cookies.get("AuthToken")
+    const authToken = Cookies.get("AuthToken");
 
     useEffect(() => {
         const fetchRecommendations = async () => {
@@ -45,9 +50,10 @@ export default function RecommendedJobs() {
                         Authorization: `Bearer ${authToken}`,
                         "Content-Type": "application/json",
                     },
-                }); // Update URL
+                });
+
                 if (response.data.status) {
-                    setJobs(response.data.recomendations);
+                    setRecommendations(response.data.recomendations);
                 }
             } catch (error) {
                 console.error("Error fetching recommendations:", error);
@@ -63,33 +69,36 @@ export default function RecommendedJobs() {
         return <p className="text-gray-500">Loading recommended jobs...</p>;
     }
 
-    if (!jobs.length) {
+    if (!recommendations.length) {
         return <p className="text-gray-500">No recommended jobs available.</p>;
     }
 
     return (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {jobs.map((job) => (
-                <Card key={job.id} className="hover:shadow-lg transition">
+            {recommendations.map((rec) => (
+                <Card key={rec.job.id} className="hover:shadow-lg transition">
                     <CardHeader>
-                        <CardTitle className="text-lg">{job.title}</CardTitle>
+                        <CardTitle className="text-lg">{rec.job.title}</CardTitle>
                         <p className="text-sm text-muted-foreground">
                             <Building2 className="inline w-4 h-4 mr-1" />
-                            {job.department.name}
+                            {rec.job.department?.name}
+                        </p>
+                        <p className="text-xs text-green-600 font-medium">
+                            🔍 Match Score: {(rec.score * 100).toFixed(1)}%
                         </p>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         <p className="text-sm text-gray-600">
                             <Briefcase className="inline w-4 h-4 mr-1" />
-                            {job.type} | {job.experience_level}
+                            {rec.job.type} | {rec.job.experience_level}
                         </p>
                         <p className="text-sm text-gray-600">
                             <MapPin className="inline w-4 h-4 mr-1" />
-                            {job.location}
+                            {rec.job.location}
                         </p>
 
                         <div className="flex flex-wrap gap-2">
-                            {job.skills.map((skill, index) => (
+                            {rec.job.skills?.map((skill, index) => (
                                 <Badge key={index} variant="secondary">
                                     {skill}
                                 </Badge>
@@ -98,11 +107,11 @@ export default function RecommendedJobs() {
 
                         <div className="text-xs text-muted-foreground">
                             <span>
-                                Salary: Rs. {job.salary_min} - {job.salary_max}
+                                Salary: Rs. {rec.job.salary_min} - {rec.job.salary_max}
                             </span>
                             <br />
                             <span>
-                                Deadline: {new Date(job.application_deadline).toLocaleDateString()}
+                                Deadline: {new Date(rec.job.application_deadline).toLocaleDateString()}
                             </span>
                         </div>
                     </CardContent>

@@ -47,13 +47,27 @@ class AdminController extends Controller
         ]);
     }
 
-    public function deleteUser($id)
+    // public function deleteUser($id)
+    // {
+    //     $user = User::findOrFail($id);
+    //     $user->delete();
+
+    //     return response()->json(['message' => 'User deleted successfully']);
+    // }
+    public function deleteUser(Request $request, $id)
     {
+        $authenticatedUserId = $request->user()->id;
+
+        if ((int) $id === $authenticatedUserId) {
+            return response()->json(['message' => 'You cannot delete your own account.'], 403);
+        }
+
         $user = User::findOrFail($id);
         $user->delete();
 
         return response()->json(['message' => 'User deleted successfully']);
     }
+
     // List applications
     public function listApplications()
     {

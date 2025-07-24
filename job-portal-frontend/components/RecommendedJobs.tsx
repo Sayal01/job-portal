@@ -35,7 +35,9 @@ type Job = {
 export default function RecommendedJobs() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
+    const role = Cookies.get("Role")
     const authToken = Cookies.get("AuthToken")
+    console.log(role)
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
@@ -58,8 +60,12 @@ export default function RecommendedJobs() {
         fetchRecommendations();
     }, []);
 
+    if (role !== "job_seeker") {
+        return null; // 👈 Don't show anything for other roles
+    }
     if (loading) return <p className="text-gray-500">Loading recommended jobs...</p>;
     if (jobs.length === 0) return <p className="text-gray-500">No recommended jobs found.</p>;
+
 
     return (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6  ml-16 ">
@@ -94,9 +100,8 @@ export default function RecommendedJobs() {
                                     Salary: Rs. {job.salary_min} - {job.salary_max}
                                 </span>
                                 <br />
-                                <span>
-                                    Deadline: {new Date(job.application_deadline).toLocaleDateString()}
-                                </span>
+                                <span>Deadline: {job.application_deadline.split("T")[0]}</span>
+
                             </div>
                         </CardContent>
                     </Card>

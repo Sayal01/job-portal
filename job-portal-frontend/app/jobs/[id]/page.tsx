@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Header } from "@/components/header";
+
 import { MapPin, Clock, DollarSign, Building, Users, Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,6 +14,7 @@ import axios from "axios";
 import { use } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import Loader from "@/components/Loader";
 
 interface Company {
     logo: string;
@@ -32,11 +33,13 @@ interface Job {
     company: Company;
     location: string;
     type: string;
-    salary: string;
+    salary_min: string;
+    salary_max: string;
     description: string;
     requirements: string[] | null;
+    skills: string[] | null;
     responsibilities: string[] | null;
-    postedDate: string;
+    application_deadline: string;
     start_date?: string;
 }
 
@@ -46,7 +49,12 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     const [loading, setLoading] = useState(true);
     const [hasApplied, setHasApplied] = useState(false);
     const token = Cookies.get("AuthToken");
+    const user = Cookies.get("user")
+    const parsedUser = user ? JSON.parse(user) : null;
+    const userRole = parsedUser?.role || "guest";
+    const isJobSeeker = userRole === "job_seeker";
 
+    console.log(user)
     useEffect(() => {
         const fetchJob = async () => {
             try {
@@ -92,7 +100,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <Loader />;
     }
 
     if (!job) {
@@ -101,7 +109,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
+
             <main className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
@@ -125,14 +133,16 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Clock className="h-4 w-4" />
-                                                {job.postedDate}
+                                                {job.start_date ? new Date(job.start_date).toLocaleDateString() : "N/A"}
+
+
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <Badge variant="secondary">{job.type}</Badge>
                                             <div className="flex items-center gap-1 text-green-600 font-medium">
-                                                <DollarSign className="h-4 w-4" />
-                                                {job.salary}
+                                                Rs
+                                                {job.salary_min} - {job.salary_max}
                                             </div>
                                         </div>
                                     </div>
@@ -150,7 +160,27 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                             </CardContent>
                         </Card>
 
-                        {/* Requirements */}
+                        {/* skills */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Skills required:</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {job.skills && job.skills.length > 0 ? (
+                                    <ul className="space-y-2">
+                                        {job.skills.map((req, index) => (
+                                            <li key={index} className="flex items-start gap-2">
+                                                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                                                <span className="text-gray-700">{req}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-gray-500 text-sm">No specific requirements listed.</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                        {/* requirements */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Requirements</CardTitle>
@@ -203,25 +233,28 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-1">
-                                        <Users className="h-4 w-4" />
+                                        Job Deadline
                                         {/* Applicants count placeholder if you have it */}
                                         {/* Replace with real data if available */}
                                         -
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Calendar className="h-4 w-4" />
-                                        {job.start_date || "N/A"}
+                                        {job.application_deadline ? new Date(job.application_deadline).toLocaleDateString() : "N/A"}
+
                                     </div>
                                 </div>
                                 <Separator />
-                                {hasApplied ? (
-                                    <Button className="w-full" size="lg" disabled>
-                                        Applied
-                                    </Button>
-                                ) : (
-                                    <Button className="w-full" size="lg" onClick={handleApplyClick}>
-                                        Apply Now
-                                    </Button>
+                                {isJobSeeker && (
+                                    hasApplied ? (
+                                        <Button className="w-full" size="lg" disabled>
+                                            Applied
+                                        </Button>
+                                    ) : (
+                                        <Button className="w-full" size="lg" onClick={handleApplyClick}>
+                                            Apply Now
+                                        </Button>
+                                    )
                                 )}
                                 {/* <Button variant="outline" className="w-full bg-transparent">
                                     Save Job
@@ -237,13 +270,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                             <CardContent>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img src={`${API_IMG}/${job.company.logo}`} alt="Company Logo" width={80} height={80} className="rounded-full" />
-                                    {/* <Image
-                                        src={`${API_IMG}/job.company.logo` || "/placeholder.svg"}
-                                        alt={`${job.company.company_name} logo`}
-                                        width={48}
-                                        height={48}
-                                        className="rounded-lg border"
-                                    /> */}
+
                                     <div>
                                         <h3 className="font-semibold">{job.company.company_name}</h3>
                                         <p className="text-sm text-gray-600">Company</p>

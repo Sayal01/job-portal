@@ -93,7 +93,7 @@ export const AppProvider = ({
                 setUser(response.data.user);
                 const role = response.data.user.role;
                 if (role === "job_seeker") {
-                    router.push("/job_seeker/dashboard");
+                    router.push("/");
                 } else if (role === "company") {
                     router.push("/company/dashboard");
                 } else if (role === "admin") {
