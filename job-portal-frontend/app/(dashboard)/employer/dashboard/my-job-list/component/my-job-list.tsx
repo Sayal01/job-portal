@@ -15,6 +15,7 @@ import Loader from "@/components/Loader"
 import { API_URL } from '@/lib/config'
 import { myAppHook } from "@/context/AppProvider"
 import axios from "axios"
+import { useRouter } from "next/navigation";
 
 interface myJob {
     id: string,
@@ -24,20 +25,20 @@ interface myJob {
     type: string,
     employmentType: string,
     status: "active" | "paused" | "closed" | "draft",
-    applications: number,
     views: number,
     salary_min: string,
     salary_max: string,
     postedDate: string,
     deadline: string,
-    experience_level: string
+    experience_level: string,
+    applications_count: number,
 }
 
 export function MyJobsList() {
     const { authToken, isLoading } = myAppHook()
     const [jobs, setJobs] = useState<myJob[]>()
     const [loading, setLoading] = useState(true)
-
+    const router = useRouter();
     useEffect(() => {
         const fetchJobs = async () => {
             try {
@@ -61,7 +62,9 @@ export function MyJobsList() {
         }
     }, [authToken])
 
-
+    const handleViewApplicants = (jobId: string) => {
+        router.push(`/employer/dashboard/applicant-list/${jobId}`);
+    };
     return loading ? (
         <Loader />
     ) : (
@@ -142,6 +145,7 @@ export function MyJobsList() {
                                                             {job.experience_level}
                                                         </span>
                                                     )}
+                                                    <span>no of applications: {job.applications_count}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -164,6 +168,7 @@ export function MyJobsList() {
                                             >
                                                 <Edit className="h-4 w-4" />
                                             </Link>
+                                            <button onClick={() => handleViewApplicants(job.id)}> view application</button>
 
                                             {/* <Link
                                                 href={`/dashboard/jobs/${job.id}/applications`}

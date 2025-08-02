@@ -19,7 +19,7 @@ export default function HomePage() {
             Discover thousands of job opportunities from top companies
           </p>
         </div>
-        <JobSearch />
+        {/* <JobSearch /> */}
         <JobListings />
       </div>
     </div>

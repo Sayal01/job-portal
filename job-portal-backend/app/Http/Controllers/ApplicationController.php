@@ -102,6 +102,41 @@ class ApplicationController extends Controller
 
         return response()->json($applications);
     }
+    public function viewApplicantsForJob($jobId)
+    {
+        $employer = auth()->user()->company;
+
+        if (!$employer) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Fetch the job and ensure it belongs to the employer
+        $job = $employer->jobs()->with('applications.user')->find($jobId);
+
+        if (!$job) {
+            return response()->json(['error' => 'Job not found or not owned by employer'], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'job' => [
+                'id' => $job->id,
+                'title' => $job->title,
+                'applicants' => $job->applications->map(function ($application) {
+                    return [
+                        'application_id' => $application->id,
+                        'applicant' => trim(($application->user->first_name ?? '') . ' ' . ($application->user->last_name ?? '')) ?: 'N/A',
+
+                        'email' => $application->user->email ?? 'N/A',
+                        'status' => $application->status,
+                        'applied_at' => $application->created_at->toDateString(),
+                        // Add other fields like resume, cover letter etc. if needed
+                    ];
+                }),
+            ],
+        ]);
+    }
+
     public function showApplicant($userId)
     {
         $authUser = auth()->user();

@@ -56,7 +56,7 @@ class JobController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $jobs = $employer->jobs()->with('company')->latest()->get();
+        $jobs = $employer->jobs()->with('company')->withCount('applications')->latest()->get();
 
         return response()->json([
             'status' => true,

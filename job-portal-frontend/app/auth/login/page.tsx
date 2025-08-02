@@ -13,6 +13,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { myAppHook } from "@/context/AppProvider"
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/config"
 
 
 export default function LoginPage() {
@@ -20,6 +21,8 @@ export default function LoginPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false)
     const { login, authToken } = myAppHook();
+    const [showForgotModal, setShowForgotModal] = useState(false);
+
 
 
 
@@ -118,9 +121,13 @@ export default function LoginPage() {
                                         Remember me
                                     </Label>
                                 </div>
-                                <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotModal(true)}
+                                    className="text-sm text-blue-600 hover:underline"
+                                >
                                     Forgot password?
-                                </Link>
+                                </button>
                             </div>
 
                             {/* Submit button */}
@@ -153,6 +160,51 @@ export default function LoginPage() {
                         </div>
                     </CardContent>
                 </Card>
+                {showForgotModal && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-lg font-semibold">Reset Password</h2>
+                                <button onClick={() => setShowForgotModal(false)} className="text-gray-500 hover:text-gray-700">
+                                    ✕
+                                </button>
+                            </div>
+                            <form
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    const email = (e.currentTarget.email as HTMLInputElement).value;
+                                    try {
+                                        await fetch(`${API_URL}/forgot-password`, {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ email }),
+                                        });
+                                        alert("Password reset link sent to your email.");
+                                        setShowForgotModal(false);
+                                    } catch (err) {
+                                        alert("Error sending reset link.");
+                                    }
+                                }}
+                                className="space-y-4"
+                            >
+                                <div>
+                                    <Label htmlFor="forgot-email">Email</Label>
+                                    <Input
+                                        id="forgot-email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        placeholder="Enter your email"
+                                        className="mt-1"
+                                    />
+                                </div>
+                                <Button type="submit" className="w-full">
+                                    Send Reset Link
+                                </Button>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
                 {/* Footer */}
                 <div className="mt-8 text-center text-sm text-gray-500">
@@ -169,5 +221,7 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+
     )
+
 }

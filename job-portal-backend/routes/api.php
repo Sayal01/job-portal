@@ -10,10 +10,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 Route::post("/register", [AuthController::class, 'register']);
 Route::post("/login", [AuthController::class, 'login']);
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+
 Route::get('/jobs', [JobController::class, 'index']); // anyone can see job list
 Route::get('/jobs/{job}', [JobController::class, 'show']); // anyone can see job details
 Route::get('/companies', [CompanyController::class, 'index']);
@@ -63,6 +68,7 @@ Route::group(["middleware" => "auth:sanctum"], function () {
     // Route::get('/employer/job-stats', [ApplicationController::class, 'jobStats']);
     Route::get('/employer/jobs/active', [JobController::class, 'activeJobs']);
     Route::get('/employer/applications/recent', [ApplicationController::class, 'recentApplications']);
+    Route::get('/employer/jobs/{jobId}/applicants', [ApplicationController::class, 'viewApplicantsForJob']);
 
 
     // Apply for a job
