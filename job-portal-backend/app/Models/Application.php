@@ -23,4 +23,8 @@ class Application extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function interviews()
+    {
+        return $this->hasMany(JobInterview::class);
+    }
 }

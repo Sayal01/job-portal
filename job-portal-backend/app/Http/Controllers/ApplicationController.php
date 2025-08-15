@@ -84,7 +84,7 @@ class ApplicationController extends Controller
         return response()->json(['message' => 'Application cancelled']);
     }
 
-    // List all applications for jobs owned by the authenticated company
+    // List all applications for jobs owned by the authenticated company, including interview rounds
     public function employerIndex()
     {
         $employer = auth()->user()->company;
@@ -93,7 +93,7 @@ class ApplicationController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $applications = Application::with('job', 'user')
+        $applications = Application::with(['job', 'user.profile', 'interviews']) // include interviews
             ->whereHas('job', function ($query) use ($employer) {
                 $query->where('company_id', $employer->id);
             })
@@ -219,7 +219,7 @@ class ApplicationController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:submitted,reviewed,accepted,rejected',
+            'status' => 'required|in:pending,shortlisted,in_interview,selected,rejected',
         ]);
 
         $application->status = $request->status;

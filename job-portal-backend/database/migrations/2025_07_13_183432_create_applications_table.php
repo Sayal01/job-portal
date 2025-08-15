@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('cover_letter')->nullable();
             $table->timestamps();
-            $table->enum('status', ['submitted', 'reviewed', 'accepted', 'rejected'])->default('submitted');
+            $table->enum('status', ['pending', 'shortlisted', 'in_interview', 'selected', 'rejected'])->default('pending');
         });
     }
 

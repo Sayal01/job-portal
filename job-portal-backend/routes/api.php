@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\JobInterviewController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
@@ -79,6 +80,11 @@ Route::group(["middleware" => "auth:sanctum"], function () {
     Route::get('/employer/applications', [ApplicationController::class, 'employerIndex']);
     Route::put('/applications/{application}/status', [ApplicationController::class, 'updateStatus']);
     Route::get('/applications/applicant/{userId}', [ApplicationController::class, 'showApplicant']);
+
+    Route::get('/applications/{id}/interviews', [JobInterviewController::class, 'index']);
+    Route::post('/applications/{id}/interviews', [JobInterviewController::class, 'store']);
+    Route::put('/interviews/{id}', [JobInterviewController::class, 'update']);
+
 
 
 
