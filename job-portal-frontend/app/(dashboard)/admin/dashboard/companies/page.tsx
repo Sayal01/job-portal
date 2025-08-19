@@ -26,7 +26,7 @@ export default function ManageCompaniesPage() {
                 const data = await res.json();
                 setCompanies(data.companies || []);
             } catch (err) {
-                console.error("Failed to fetch companies");
+                console.error("Failed to fetch companies", err);
             } finally {
                 setLoading(false);
             }

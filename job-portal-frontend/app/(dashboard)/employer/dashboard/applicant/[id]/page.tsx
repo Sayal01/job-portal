@@ -5,8 +5,8 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import { API_IMG, API_URL } from "@/lib/config";
 import Loader from "@/components/Loader";
-import { User, ClipboardList, Briefcase, Upload } from "lucide-react";
-import { headers } from "next/headers";
+import { User } from "lucide-react";
+
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function EmployerViewApplicantPage() {
                 const res = await axios.get(`${API_URL}/applications/applicant/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                const { user, profile } = res.data;
+                const { user } = res.data;
 
                 setLocalUser({
                     first_name: user.first_name,

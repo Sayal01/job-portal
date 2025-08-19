@@ -5,8 +5,7 @@ import { Trash2 } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { API_URL } from "@/lib/config" // Assuming this is defined elsewhere
 import Cookies from "js-cookie" // Assuming this is installed
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+
 
 interface User {
     id: number

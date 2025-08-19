@@ -62,13 +62,13 @@ export function DashboardSidebar({ userType }: DashboardSidebarProps) {
 
     return (
         <div className="w-64 bg-white shadow-sm border-r min-h-screen space-y-3.5">
-            <nav className="p-4 space-y-3">
+            <nav className="p-4 space-y-1  ">
                 {items.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
 
                     return (
-                        <Link key={item.href} href={item.href}>
+                        <Link key={item.href} href={item.href} className="flex items-center">
                             <Button
                                 variant={isActive ? "secondary" : "ghost"}
                                 className={cn("w-full justify-start", isActive && "bg-blue-50 text-blue-700 hover:bg-blue-50")}

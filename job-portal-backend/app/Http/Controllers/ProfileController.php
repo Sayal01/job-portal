@@ -52,6 +52,7 @@ class ProfileController extends Controller
             'skills' => 'nullable|array',
             'education' => 'nullable|array',
             'work_experience' => 'nullable|array',
+            'preferred_role' => 'nullable|string',
             'resume_file' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // 5MB limit
         ]);
 
@@ -61,6 +62,7 @@ class ProfileController extends Controller
         $profile->skills = $request->input('skills', $profile->skills);
         $profile->education = $request->input('education', $profile->education);
         $profile->work_experience = $request->input('work_experience', $profile->work_experience);
+        $profile->preferred_role = $request->input('preferred_role', $profile->preferred_role);
 
         if ($request->hasFile('resume_file')) {
             $path = $request->file('resume_file')->storeAs(

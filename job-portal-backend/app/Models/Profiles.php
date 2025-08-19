@@ -13,6 +13,7 @@ class Profiles extends Model
         'skills',
         'education',
         'work_experience',
+        'preferred_role',
         'resume_file'
     ];
 

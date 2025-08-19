@@ -6,6 +6,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { fetchNotifications } from "@/lib/notification";
 
 
 
@@ -28,7 +29,9 @@ interface AppProviderType {
     login: (data: loginData) => Promise<void>,
     register: (data: registerData) => Promise<void>,
     user: User | null,
-    logout: () => void;
+    logout: () => void,
+    notifications: any[];
+    setNotifications: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 interface User {
@@ -48,6 +51,8 @@ export const AppProvider = ({
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [authToken, setAuthToken] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [notifications, setNotifications] = useState<any[]>([]);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -91,6 +96,12 @@ export const AppProvider = ({
                 toast.success("login Sucessfull");
                 setAuthToken(response.data.token);
                 setUser(response.data.user);
+
+                const notifData = await fetchNotifications();
+                setNotifications(notifData);
+
+
+
                 const role = response.data.user.role;
                 if (role === "job_seeker") {
                     router.push("/");
@@ -149,12 +160,13 @@ export const AppProvider = ({
         Cookies.remove("AuthToken");
         Cookies.remove("user")
         Cookies.remove("Role")
+        setNotifications([]);
         setIsLoading(false);
         toast.success("Logout Successful");
         router.push("/auth/login");
     }
     return (
-        <AppContext.Provider value={{ login, register, isLoading, authToken, user, logout }}>
+        <AppContext.Provider value={{ login, register, isLoading, authToken, user, logout, notifications, setNotifications }}>
             {isLoading ? <Loader /> : children}
         </AppContext.Provider>
 

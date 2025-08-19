@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { API_URL } from "@/lib/config";
-import { headers } from "next/headers";
+
 import Cookies from "js-cookie";
 type Department = {
     id: number;
@@ -14,7 +14,6 @@ type Department = {
 export default function DepartmentManagement() {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [name, setName] = useState("");
-    const [slug, setSlug] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const authToken = Cookies.get("AuthToken")

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Job;
 use Illuminate\Http\Request;
+use App\Models\Notification;
 
 class ApplicationController extends Controller
 {
@@ -32,7 +33,7 @@ class ApplicationController extends Controller
 
 
     // Apply to a job
-    public function store(Request $request, $job)
+    public function store(Request $request, $jobId)
     {
         $user = auth()->user();
 
@@ -43,8 +44,9 @@ class ApplicationController extends Controller
         $request->validate([
             'cover_letter' => 'nullable|string',
         ]);
+        $job = Job::with('company.employer')->findOrFail($jobId);
 
-        $exists = Application::where('job_id', $job)
+        $exists = Application::where('job_id', $job->id)
             ->where('user_id', auth()->id())
             ->exists();
 
@@ -53,11 +55,20 @@ class ApplicationController extends Controller
         }
 
         $application = Application::create([
-            'job_id' => $job,
+            'job_id' => $job->id,
             'user_id' => auth()->id(),
             'cover_letter' => $request->cover_letter,
         ]);
-
+        Notification::create([
+            'user_id' => $job->company->employer->id, // recipient
+            'type' => 'new_application',
+            'data' => [
+                'job_id' => $job->id,
+                'job_title' => $job->title,
+                'applicant_name' => $application->user->first_name . ' ' . $application->user->last_name,
+                'application_id' => $application->id,
+            ],
+        ]);
         return response()->json($application, 201);
     }
 
@@ -126,7 +137,7 @@ class ApplicationController extends Controller
                     return [
                         'application_id' => $application->id,
                         'applicant' => trim(($application->user->first_name ?? '') . ' ' . ($application->user->last_name ?? '')) ?: 'N/A',
-
+                        'user_id' => $application->user->id ?? null,
                         'email' => $application->user->email ?? 'N/A',
                         'status' => $application->status,
                         'applied_at' => $application->created_at->toDateString(),
@@ -224,7 +235,15 @@ class ApplicationController extends Controller
 
         $application->status = $request->status;
         $application->save();
-
+        Notification::create([
+            'user_id' => $application->user_id,
+            'type' => 'application_status_update',
+            'data' => [
+                'job_title' => $application->job->title,
+                'status' => $application->status,
+            ],
+            'read' => false,
+        ]);
         return response()->json($application);
     }
 }

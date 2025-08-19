@@ -4,8 +4,8 @@ import axios from "axios"
 import { API_URL } from "@/lib/config"
 import { myAppHook } from "@/context/AppProvider"
 import { useEffect, useState } from "react"
-import { Plus, X, Save, Eye, MapPin, DollarSign, Clock, Briefcase, GraduationCap, Star, Building, Users, } from "lucide-react"
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { Plus, X, MapPin, DollarSign, Clock, Briefcase, GraduationCap, Star, Building, Users, } from "lucide-react"
+import { useRouter, useParams, } from "next/navigation";
 
 type Mode = "add" | "view" | "edit";
 interface JobFormProps {
@@ -127,10 +127,10 @@ function PostJobForm({ mode }: JobFormProps) {
         // router.push("/dashboard/my-jobs")
     }
 
-    const handleSaveDraft = () => {
-        console.log("Draft saved:", formData)
-        alert("Draft saved successfully!")
-    }
+    // const handleSaveDraft = () => {
+    //     console.log("Draft saved:", formData)
+    //     alert("Draft saved successfully!")
+    // }
 
     return (
         <div className="space-y-8">
@@ -322,7 +322,7 @@ function PostJobForm({ mode }: JobFormProps) {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
                             />
                             <p className="text-sm text-gray-500 mt-2">
-                                💡 Tip: Include information about your company, the role's impact, and growth opportunities
+                                💡 Tip: Include information about your company, the roles impact, and growth opportunities
                             </p>
                         </div>
                     </div>

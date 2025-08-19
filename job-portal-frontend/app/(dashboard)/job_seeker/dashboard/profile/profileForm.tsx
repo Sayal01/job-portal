@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { myAppHook } from "@/context/AppProvider";
-import { useRouter, useParams } from "next/navigation";
+
 import Loader from "@/components/Loader";
 import {
     User,
     ClipboardList,
-    Eye,
     Briefcase,
     Upload,
 } from "lucide-react";
@@ -19,13 +18,15 @@ type Mode = "add" | "view" | "edit";
 type Education = {
     institution: string;
     degree: string;
-    year: string;
+    start_date: string;
+    end_date: string;
 };
 
 type WorkExperience = {
     company: string;
     position: string;
-    years: string;
+    start_date: string;
+    end_date: string;
 };
 type WorkExperienceItem = WorkExperience & { isEditing?: boolean };
 type EducationItem = Education & { isEditing?: boolean };
@@ -38,13 +39,15 @@ type JobSeekerProfileFormData = {
     work_experience: WorkExperienceItem[];
     resume_file: File | null; // ✅ only the upload file
     resume_url: string | null; // ✅ the saved public URL
+    preferred_role?: string | null;
 };
 
 const initialFormData: JobSeekerProfileFormData = {
     bio: "",
     skills: [],
-    education: [{ institution: "", degree: "", year: "" }],
-    work_experience: [{ company: "", position: "", years: "" }],
+    education: [{ institution: "", degree: "", start_date: "", end_date: "" }],
+    work_experience: [{ company: "", position: "", start_date: "", end_date: "" }],
+    preferred_role: "",
     resume_file: null,
     resume_url: null,
 };
@@ -53,7 +56,7 @@ interface LocalUser {
     last_name: string;
     email: string;
     image?: string | null;
-    role: string;
+    role: string | null;
 }
 
 
@@ -109,9 +112,10 @@ export function JobSeekerProfileForm() {
                         bio: data.bio || "",
                         skills: data.skills || [],
                         education: data.education || [{ institution: "", degree: "", year: "" }],
-                        work_experience: data.work_experience || [{ company: "", position: "", years: "" }],
+                        work_experience: data.work_experience || [{ company: "", position: "", start_date: "", end_date: "" }],
                         resume_file: null,
                         resume_url: resumeUrl,
+                        preferred_role: data.preferred_role || "",
                     };
 
                     setFormData(fetchedData);
@@ -124,6 +128,7 @@ export function JobSeekerProfileForm() {
                     setMode("view");
                 }
             } catch (error) {
+                console.error("Failed to fetch profile:", error);
                 setShowAddPrompt(true);
                 setMode("view");
             }
@@ -156,7 +161,7 @@ export function JobSeekerProfileForm() {
             ...formData,
             education: [
                 ...formData.education,
-                { institution: "", degree: "", year: "", isEditing: true },
+                { institution: "", degree: "", start_date: "", end_date: "", isEditing: true },
             ],
         });
     };
@@ -172,6 +177,25 @@ export function JobSeekerProfileForm() {
             education: formData.education.filter((_, i) => i !== index),
         });
     };
+    function calculateYears(startDate: string, endDate?: string) {
+        if (!startDate) return 0;
+
+        const start = new Date(startDate);
+        const end = endDate ? new Date(endDate) : new Date(); // Use today if endDate is empty
+
+        let years = end.getFullYear() - start.getFullYear();
+        const monthDiff = end.getMonth() - start.getMonth();
+        const dayDiff = end.getDate() - start.getDate();
+
+        // Adjust if the end month/day hasn't reached yet
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+            years--;
+        }
+
+        return years;
+    }
+
+
 
     // Work Experience handlers
     const updateWorkExperience = (index: number, field: keyof WorkExperience, value: string) => {
@@ -184,7 +208,7 @@ export function JobSeekerProfileForm() {
             ...formData,
             work_experience: [
                 ...formData.work_experience,
-                { company: "", position: "", years: "", isEditing: true },
+                { company: "", position: "", start_date: "", end_date: "", isEditing: true },
             ],
         });
     };
@@ -216,6 +240,7 @@ export function JobSeekerProfileForm() {
             if (formData.resume_file) {
                 form.append("resume_file", formData.resume_file);
             }
+            form.append("preferred_role", formData.preferred_role || "");
 
             const response = await axios.post(`${API_URL}/profile-update`, form, {
                 headers: { Authorization: `Bearer ${authToken}` },
@@ -239,6 +264,7 @@ export function JobSeekerProfileForm() {
             }));
 
             setMode("view");
+            console.log(formData)
         } catch (error) {
             console.error(error);
             alert("Error saving profile.");
@@ -246,6 +272,7 @@ export function JobSeekerProfileForm() {
             setIsSubmitting(false);
         }
     };
+
 
     if (loading) {
         return (
@@ -274,7 +301,7 @@ export function JobSeekerProfileForm() {
 
     if (mode === "view") {
         return (
-            <div className="max-w-4xl mx-auto p-6 space-y-6">
+            <div className="max-w-5xl mx-auto p-6 space-y-6">
                 <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
                 <>
                     <div className="flex items-center space-x-4 mb-6">
@@ -307,6 +334,10 @@ export function JobSeekerProfileForm() {
                     <h2 className="text-xl font-semibold mb-2">Bio</h2>
                     <p className="text-gray-700">{formData.bio || "No bio provided."}</p>
                 </div>
+                <div>
+                    <h2 className="text-xl font-semibold mb-2">Preferred role</h2>
+                    <p className="text-gray-700">{formData.preferred_role || "No role specified."}</p>
+                </div>
 
                 {/* Skills */}
                 <div>
@@ -335,7 +366,7 @@ export function JobSeekerProfileForm() {
                             formData.education.map((edu, i) => (
                                 <div key={i} className="border p-4 rounded">
                                     <p className="font-medium">{edu.institution}</p>
-                                    <p>{edu.degree} — {edu.year}</p>
+                                    <p>{edu.degree} — {edu.start_date} to {edu.end_date}</p>
                                 </div>
                             ))
                         ) : (
@@ -352,7 +383,7 @@ export function JobSeekerProfileForm() {
                             formData.work_experience.map((work, i) => (
                                 <div key={i} className="border p-4 rounded">
                                     <p className="font-medium">{work.company}</p>
-                                    <p>{work.position} — {work.years}</p>
+                                    <p>{work.position} — {work.start_date} to {work.end_date}</p>
                                 </div>
                             ))
                         ) : (
@@ -394,7 +425,7 @@ export function JobSeekerProfileForm() {
 
     // Add / Edit form UI (same)
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-5xl mx-auto p-6">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold text-gray-900">
                     {mode === "add" ? "Add Your Profile" : "Edit Your Profile"}
@@ -415,6 +446,19 @@ export function JobSeekerProfileForm() {
                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                         required
                     />
+                </section>
+                <section>
+                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-2 text-gray-900">
+                        <User className="w-5 h-5" /> Preferred Role
+                    </h2>
+                    <input
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="text"
+                        name="preferred_role"
+                        value={formData.preferred_role || ''}
+                        onChange={(e) => setFormData({ ...formData, preferred_role: e.target.value })}
+                    />
+
                 </section>
 
                 {/* Skills */}
@@ -487,12 +531,18 @@ export function JobSeekerProfileForm() {
                                             required
                                         />
                                         <input
-                                            type="text"
-                                            placeholder="Year"
-                                            value={edu.year}
-                                            onChange={(e) => updateEducation(index, "year", e.target.value)}
+                                            type="date"
+                                            placeholder="End Date"
+                                            value={edu.start_date || ""}
+                                            onChange={(e) => updateEducation(index, "start_date", e.target.value)}
                                             className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
+                                        />
+                                        <input
+                                            type="date"
+                                            placeholder="End Date"
+                                            value={edu.end_date || ""}
+                                            onChange={(e) => updateEducation(index, "end_date", e.target.value)}
+                                            className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
                                         <div className="flex gap-2 mt-2">
                                             <button
@@ -515,7 +565,7 @@ export function JobSeekerProfileForm() {
                                     <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                                         <div>
                                             <p className="font-medium">{edu.institution}</p>
-                                            <p>{edu.degree} — {edu.year}</p>
+                                            <p>{edu.degree} — {edu.start_date} - {edu.end_date}</p>
                                         </div>
                                         <div className="flex gap-4 mt-2 md:mt-0">
                                             <button
@@ -560,7 +610,7 @@ export function JobSeekerProfileForm() {
                                 className="border p-4 rounded-lg bg-white shadow"
                             >
                                 {work.isEditing ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                         <input
                                             type="text"
                                             placeholder="Company"
@@ -578,12 +628,19 @@ export function JobSeekerProfileForm() {
                                             required
                                         />
                                         <input
-                                            type="text"
-                                            placeholder="Years"
-                                            value={work.years}
-                                            onChange={(e) => updateWorkExperience(index, "years", e.target.value)}
+                                            type="date"
+                                            placeholder="Start Date"
+                                            value={work.start_date || ""}
+                                            onChange={(e) => updateWorkExperience(index, "start_date", e.target.value)}
                                             className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             required
+                                        />
+                                        <input
+                                            type="date"
+                                            placeholder="End Date"
+                                            value={work.end_date || ""}
+                                            onChange={(e) => updateWorkExperience(index, "end_date", e.target.value)}
+                                            className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
                                         <div className="flex gap-2 mt-2">
                                             <button
@@ -606,7 +663,10 @@ export function JobSeekerProfileForm() {
                                     <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                                         <div>
                                             <p className="font-medium">{work.company}</p>
-                                            <p>{work.position} — {work.years}</p>
+                                            <p>
+                                                {work.position} — {work.start_date} to {work.end_date || "Present"} ({calculateYears(work.start_date, work.end_date)} yrs)
+                                            </p>
+
                                         </div>
                                         <div className="flex gap-4 mt-2 md:mt-0">
                                             <button

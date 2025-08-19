@@ -20,7 +20,7 @@ const CompanyPage: React.FC = () => {
     const [company, setCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { authToken, user } = myAppHook();
+    const { authToken } = myAppHook();
     const [isEditing, setIsEditing] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     console.log(authToken)
@@ -63,7 +63,7 @@ const CompanyPage: React.FC = () => {
                     setError("Failed to fetch company data");
                 }
             } catch (err) {
-                setError("An error occurred while fetching company data");
+                setError("An error occurred while fetching company data" + err);
             } finally {
                 setLoading(false);
             }

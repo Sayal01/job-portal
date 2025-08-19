@@ -6,13 +6,13 @@ import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { API_URL, API_IMG } from "@/lib/config";
+import { API_URL } from "@/lib/config";
 import toast from "react-hot-toast";
 import {
-    MapPin,
+
     Building,
     Mail,
-    Phone,
+
     User,
     FileText,
 } from "lucide-react";
@@ -38,7 +38,9 @@ interface Application {
     email: string;
     status: string;
     applied_at: string;
+    user_id: string; // ✅ add this
     user: UserType;
+
 }
 
 export default function ApplicantsByJobPage() {
@@ -128,7 +130,7 @@ export default function ApplicantsByJobPage() {
 
                                         <Button variant="outline" asChild>
                                             <Link
-                                                href={`/employer/dashboard/applicant/${app.application_id}`}
+                                                href={`/employer/dashboard/applicant/${app.user_id}`}
                                                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                                             >
                                                 View Applicant

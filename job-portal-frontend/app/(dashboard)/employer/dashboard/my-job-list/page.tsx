@@ -1,5 +1,4 @@
-import { DashboardHeader } from "@/components/dashboard-header"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
+
 import { MyJobsList } from "@/app/(dashboard)/employer/dashboard/my-job-list/component/my-job-list"
 
 export default function MyJobsPage() {

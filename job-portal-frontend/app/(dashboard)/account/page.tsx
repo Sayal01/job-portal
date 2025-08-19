@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { myAppHook } from "@/context/AppProvider";
 import axios from "axios";
 import { API_URL, API_IMG } from "@/lib/config";
-import { User, Lock, Eye, EyeOff } from "lucide-react";
+import { User, Eye, EyeOff } from "lucide-react";
 
 interface UserData {
     first_name: string;

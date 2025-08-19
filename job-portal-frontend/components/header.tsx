@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import axios from "axios";
 import { API_URL, API_IMG } from "@/lib/config";
+import NotificationsDropdown from "./notification";
+import { fetchNotifications } from "@/lib/notification";
+
 
 interface LocalUser {
     first_name: string;
@@ -27,14 +30,20 @@ interface LocalUser {
 }
 
 export function Header() {
-    const { logout, authToken } = myAppHook();
+    const { logout, authToken, user, notifications, setNotifications } = myAppHook();
+    // const [notifications, setNotifications] = useState<any[]>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
     const [localUser, setLocalUser] = useState<LocalUser | null>(null);
     const router = useRouter();
 
     useEffect(() => {
         async function fetchUser() {
             if (!authToken) return;
-
+            const loadNotifications = async () => {
+                const data = await fetchNotifications();
+                setNotifications(data);
+            };
+            loadNotifications();
             try {
                 const res = await axios.get(`${API_URL}/me`, {
                     headers: { Authorization: `Bearer ${authToken}` },
@@ -55,7 +64,7 @@ export function Header() {
 
         fetchUser();
     }, [authToken]);
-
+    const unreadCount = notifications.filter(n => !n.read).length;
     return (
         <header className="bg-blue-400 shadow-sm border-b">
             <div className="container mx-auto px-4">
@@ -83,6 +92,30 @@ export function Header() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-3">
+                        {/* Notifications Dropdown */}
+                        <div className="relative">
+                            {/* Notification Icon */}
+                            <button onClick={() => setShowDropdown(prev => !prev)} className="relative">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-0 right-0 bg-red-500 text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Dropdown */}
+                            {showDropdown && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white text-black shadow-lg rounded z-50">
+                                    <NotificationsDropdown
+                                        notifications={notifications}
+                                        setNotifications={setNotifications}
+                                    />
+                                </div>
+                            )}
+                        </div>
                         {!authToken ? (
                             <Button asChild variant="ghost" size="sm">
                                 <a href="/auth/login">

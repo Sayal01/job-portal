@@ -10,9 +10,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\JobRecommendationController;
 use App\Http\Controllers\JobInterviewController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\NotificationController;
 
 Route::post("/register", [AuthController::class, 'register']);
 Route::post("/login", [AuthController::class, 'login']);
@@ -33,6 +35,7 @@ Route::apiResource('/departments', DepartmentController::class)
 
 
 Route::middleware(['auth:sanctum', 'can:admin'])->prefix('admin')->group(function () {
+    Route::post('/user/create', [AdminController::class, 'store']);
     Route::get('/dashboard-counts', [AdminController::class, 'dashboardCounts']);
     Route::get('/users', [AdminController::class, 'listUsers']);
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
@@ -49,6 +52,12 @@ Route::middleware(['auth:sanctum', 'can:admin'])->prefix('admin')->group(functio
 
 
 Route::group(["middleware" => "auth:sanctum"], function () {
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/clear-read', [NotificationController::class, 'clearRead']);
+
+
     Route::get("/profile", [AuthController::class, 'profile']);
     Route::middleware('auth:sanctum')->get('/my-jobs', [JobController::class, 'myJobs']);
     Route::middleware('auth:sanctum')->post('/update-account', [UserController::class, 'updateAccount']);
@@ -75,8 +84,7 @@ Route::group(["middleware" => "auth:sanctum"], function () {
     // Apply for a job
     Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store']);
     Route::get('/applications', [ApplicationController::class, 'index']);
-    Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->middleware('auth:sanctum');
-
+    Route::delete('/applications/{application}', [ApplicationController::class, 'destroy']);
     Route::get('/employer/applications', [ApplicationController::class, 'employerIndex']);
     Route::put('/applications/{application}/status', [ApplicationController::class, 'updateStatus']);
     Route::get('/applications/applicant/{userId}', [ApplicationController::class, 'showApplicant']);
@@ -84,7 +92,11 @@ Route::group(["middleware" => "auth:sanctum"], function () {
     Route::get('/applications/{id}/interviews', [JobInterviewController::class, 'index']);
     Route::post('/applications/{id}/interviews', [JobInterviewController::class, 'store']);
     Route::put('/interviews/{id}', [JobInterviewController::class, 'update']);
+    Route::get('/employer/candidates', [JobInterviewController::class, 'employerCandidates']);
+    Route::get('/my-interviews', [JobInterviewController::class, 'myInterviews']);
 
+    Route::middleware('auth:sanctum')
+        ->get('/recommend-jobs/{profile_id?}', [JobRecommendationController::class, 'recommendJobs']);
 
 
 

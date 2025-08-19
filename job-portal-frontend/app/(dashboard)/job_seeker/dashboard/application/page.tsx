@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+
 import { API_URL, API_IMG } from "@/lib/config";
 import toast from "react-hot-toast";
 import { Trash2, MapPin, Building } from "lucide-react";
-import { myAppHook } from "@/context/AppProvider";
+
 import Cookies from "js-cookie";
 interface Company {
     id: string;

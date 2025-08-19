@@ -1,3 +1,4 @@
+import { Link } from "lucide-react"
 import Image from "next/image"
 
 export default function AboutUsPage() {
@@ -129,12 +130,12 @@ export default function AboutUsPage() {
                     <p className="text-lg opacity-90 mb-8">
                         Join thousands of job seekers and employers who trust JobPortal for their career and hiring needs.
                     </p>
-                    <a
+                    <Link
                         href="/"
                         className="inline-block bg-white text-blue-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-full text-lg transition-colors duration-300 shadow-lg"
                     >
                         Explore Jobs Now
-                    </a>
+                    </Link>
                 </div>
             </section>
         </div>

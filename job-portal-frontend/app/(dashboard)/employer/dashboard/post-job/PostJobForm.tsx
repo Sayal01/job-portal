@@ -4,8 +4,8 @@ import axios from "axios"
 import { API_URL } from "@/lib/config"
 import { myAppHook } from "@/context/AppProvider"
 import { useEffect, useState } from "react"
-import { Plus, X, Save, Eye, MapPin, DollarSign, Clock, Briefcase, GraduationCap, Star, Building, Users, } from "lucide-react"
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { Plus, X, MapPin, DollarSign, Clock, Briefcase, GraduationCap, Star, Building, } from "lucide-react"
+import { useRouter, useParams } from "next/navigation";
 
 type Mode = "add" | "view" | "edit";
 interface JobFormProps {
@@ -17,11 +17,11 @@ type Department = {
     slug: string;  // or any identifier you use for value attribute
 };
 interface JobFormData {
-    title: string, department_id: string, location: string, type: string, experience_level: string, salary_min: string, salary_max: string, description: string, responsibilities: string[], requirements: string[], qualifications: string[], skills: string[], applicationDeadline: string, startDate: string,
+    title: string, department_id: string, location: string, type: string, min_experience: string, max_experience: string, salary_min: string, salary_max: string, description: string, responsibilities: string[], requirements: string[], qualifications: string[], skills: string[], applicationDeadline: string, startDate: string,
 }
 
 const initialFormData: JobFormData = {
-    title: "", department_id: "", location: "", type: "", experience_level: "", salary_min: "", salary_max: "", description: "", responsibilities: [], requirements: [], qualifications: [], skills: [], applicationDeadline: "", startDate: "",
+    title: "", department_id: "", location: "", type: "", min_experience: "", max_experience: "", salary_min: "", salary_max: "", description: "", responsibilities: [], requirements: [], qualifications: [], skills: [], applicationDeadline: "", startDate: "",
 }
 
 function PostJobForm({ mode }: JobFormProps) {
@@ -35,7 +35,8 @@ function PostJobForm({ mode }: JobFormProps) {
     const params = useParams();
     const jobId = params.id as string;
     const [dateError, setDateError] = useState<string | null>(null);
-
+    const [expError, setExpError] = useState<string | null>(null);
+    const [salaryError, setSalaryError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchDepartments = async () => {
@@ -79,9 +80,14 @@ function PostJobForm({ mode }: JobFormProps) {
             const fetchJob = async () => {
                 const response = await axios.get(`${API_URL}/jobs/${jobId}`)
                 const job = await response.data;
+                const startDate = job.start_date ? new Date(job.start_date).toISOString().split("T")[0] : "";
+                const applicationDeadline = job.application_deadline ? new Date(job.application_deadline).toISOString().split("T")[0] : "";
+
                 setFormData({
                     ...formData,
-                    ...job, // match keys with your API shape!
+                    ...job,
+                    startDate,
+                    applicationDeadline,
                 });
             };
             fetchJob();
@@ -127,10 +133,10 @@ function PostJobForm({ mode }: JobFormProps) {
         // router.push("/dashboard/my-jobs")
     }
 
-    const handleSaveDraft = () => {
-        console.log("Draft saved:", formData)
-        alert("Draft saved successfully!")
-    }
+    // const handleSaveDraft = () => {
+    //     console.log("Draft saved:", formData)
+    //     alert("Draft saved successfully!")
+    // }
 
     return (
         <div className="space-y-8">
@@ -219,22 +225,6 @@ function PostJobForm({ mode }: JobFormProps) {
 
                         {/* Work Type, Employment Type, Experience Level */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Work Type <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={formData.workType}
-                                    onChange={(e) => setFormData({ ...formData, workType: e.target.value })}
-                                    required
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-                                >
-                                    <option value="">Select work type</option>
-                                    <option value="onsite">On-site</option>
-                                    <option value="remote">Remote</option>
-                                    <option value="hybrid">Hybrid</option>
-                                </select>
-                            </div> */}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -255,26 +245,59 @@ function PostJobForm({ mode }: JobFormProps) {
                                 </select>
                             </div>
 
+                            <div >
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Min Experience Level <span className="text-red-500">*</span>
+                                </label>
+                                <div>
+                                    <input
+                                        type="number"
+                                        placeholder="in years"
+                                        value={formData.min_experience || ""}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+                                            setFormData({ ...formData, min_experience: e.target.value });
+
+                                            // Validation
+                                            if (value < 0) setExpError("Experience cannot be negative");
+                                            else if (formData.max_experience && value > Number(formData.max_experience)) {
+                                                setExpError("Min experience cannot exceed max experience");
+                                            } else {
+                                                setExpError(null);
+                                            }
+                                        }}
+                                        disabled={mode === "view"}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                    {expError && <p className="text-red-500 text-sm mt-1">{expError}</p>}
+                                </div>
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Experience Level <span className="text-red-500">*</span>
+                                    Max Experience Level <span className="text-red-500">*</span>
                                 </label>
-                                <div className="relative">
-                                    <Users className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                                    <select
-                                        value={formData.experience_level || ""}
-                                        onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
-                                        required
-                                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-                                    >
-                                        <option value="">Select level</option>
-                                        <option value="0-2 years">Entry Level (0-2 years)</option>
-                                        <option value="2-3 years">Mid Level (3-5 years)</option>
-                                        <option value="3-5 years">Senior Level (6-8 years)</option>
-                                        <option value="6+ years">Lead/Principal (6+ years)</option>
-                                        <option value="executive">Executive</option>
-                                    </select>
-                                </div>
+                                <input
+                                    type="number"
+                                    placeholder="in years"
+                                    value={formData.max_experience || ""}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        setFormData({ ...formData, max_experience: e.target.value });
+
+                                        // Validation
+                                        if (value < 0) setExpError("Experience cannot be negative");
+                                        else if (formData.min_experience && value < Number(formData.min_experience)) {
+                                            setExpError("Max experience cannot be less than min experience");
+                                        } else {
+                                            setExpError(null);
+                                        }
+                                    }}
+                                    disabled={mode === "view"}
+                                    required
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                {expError && <p className="text-red-500 text-sm mt-1">{expError}</p>}
                             </div>
                         </div>
                     </div>
@@ -299,7 +322,7 @@ function PostJobForm({ mode }: JobFormProps) {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
                             />
                             <p className="text-sm text-gray-500 mt-2">
-                                💡 Tip: Include information about your company, the role's impact, and growth opportunities
+                                💡 Tip: Include information about your company, the roles impact, and growth opportunities
                             </p>
                         </div>
                     </div>
@@ -527,7 +550,18 @@ function PostJobForm({ mode }: JobFormProps) {
                                     type="number"
                                     placeholder="80000"
                                     value={formData.salary_min}
-                                    onChange={(e) => setFormData({ ...formData, salary_min: e.target.value })}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        setFormData({ ...formData, salary_min: e.target.value });
+
+                                        // Validation
+                                        if (value < 0) setSalaryError("Salary cannot be negative");
+                                        else if (formData.salary_max && value > Number(formData.salary_max)) {
+                                            setSalaryError("Minimum salary cannot exceed maximum salary");
+                                        } else {
+                                            setSalaryError(null);
+                                        }
+                                    }}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
@@ -537,12 +571,23 @@ function PostJobForm({ mode }: JobFormProps) {
                                     type="number"
                                     placeholder="120000"
                                     value={formData.salary_max}
-                                    onChange={(e) => setFormData({ ...formData, salary_max: e.target.value })}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        setFormData({ ...formData, salary_max: e.target.value });
+
+                                        // Validation
+                                        if (value < 0) setSalaryError("Salary cannot be negative");
+                                        else if (formData.salary_min && value < Number(formData.salary_min)) {
+                                            setSalaryError("Maximum salary cannot be less than minimum salary");
+                                        } else {
+                                            setSalaryError(null);
+                                        }
+                                    }}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
                         </div>
-
+                        {salaryError && <p className="text-red-500 text-sm mt-1">{salaryError}</p>}
                     </div>
                 </div>
 
@@ -578,6 +623,7 @@ function PostJobForm({ mode }: JobFormProps) {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Application Deadline</label>
                                 <input
                                     type="date"
+
                                     value={formData.applicationDeadline}
                                     onChange={(e) => {
                                         const newDeadline = e.target.value;
@@ -630,8 +676,8 @@ function PostJobForm({ mode }: JobFormProps) {
                             </button>
                         )}
                 </div>
-            </form>
-        </div>
+            </form >
+        </div >
     )
 }
 export default PostJobForm;

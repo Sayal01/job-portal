@@ -11,9 +11,10 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Cookies from "js-cookie"
 import {
-    Briefcase, Users, FileText, TrendingUp,
+    Users, TrendingUp,
     Plus, Eye, MessageSquare, Calendar
 } from "lucide-react"
+
 
 // ================= Types =================
 type JobType = {

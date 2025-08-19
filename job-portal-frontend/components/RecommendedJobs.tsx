@@ -41,7 +41,7 @@ export default function RecommendedJobs() {
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
-                const response = await axios.get("http://localhost:8000/api/recommendations", {
+                const response = await axios.get("http://localhost:8000/api/job-recomendation", {
                     headers: {
                         Authorization: `Bearer ${authToken}`,
                         "Content-Type": "application/json",

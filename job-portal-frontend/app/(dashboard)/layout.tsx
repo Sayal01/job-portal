@@ -1,9 +1,9 @@
 "use client"
-import { DashboardHeader } from "@/components/dashboard-header";
+
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import React, { ReactNode } from "react";
 import { myAppHook } from "@/context/AppProvider";
-import { Header } from "@/components/header";
+
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     const { user } = myAppHook();
 

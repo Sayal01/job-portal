@@ -19,7 +19,8 @@ return new class extends Migration
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
             $table->string('location')->nullable();
             $table->enum('type', ['full-time', 'part-time', 'internship']);
-            $table->string('experience_level')->nullable();
+            $table->integer('min_experience')->nullable();
+            $table->integer('max_experience')->nullable();
             $table->string('salary_min')->nullable();
             $table->string('salary_max')->nullable();
 

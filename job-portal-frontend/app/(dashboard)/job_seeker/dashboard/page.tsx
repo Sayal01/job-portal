@@ -45,7 +45,7 @@ export default function RecommendedJobs() {
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
-                const response = await axios.get("http://localhost:8000/api/recommendations", {
+                const response = await axios.get("http://localhost:8000/api/recommend-jobs", {
                     headers: {
                         Authorization: `Bearer ${authToken}`,
                         "Content-Type": "application/json",
@@ -53,7 +53,7 @@ export default function RecommendedJobs() {
                 });
 
                 if (response.data.status) {
-                    setRecommendations(response.data.recomendations);
+                    setRecommendations(response.data.recommendations);
                 }
             } catch (error) {
                 console.error("Error fetching recommendations:", error);

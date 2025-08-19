@@ -77,4 +77,23 @@ class AdminController extends Controller
             'applications' => $applications,
         ]);
     }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+
+        $admin = User::create([
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'email' => $request->email,
+            'password' => $request->password,
+            'role' => 'admin',
+        ]);
+
+        return response()->json(['message' => 'Admin created successfully', 'admin' => $admin]);
+    }
 }
