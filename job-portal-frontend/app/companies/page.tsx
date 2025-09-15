@@ -24,11 +24,11 @@ export default function CompaniesPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const [searchQuery, setSearchQuery] = useState("")
-    const [selectedIndustry, setSelectedIndustry] = useState("")
-    const [selectedSize, setSelectedSize] = useState("")
-    const [selectedLocation, setSelectedLocation] = useState("")
-    const [sortBy, setSortBy] = useState("featured")
+    const [searchQuery] = useState("")
+    const [selectedIndustry] = useState("")
+    const [selectedSize] = useState("")
+    const [selectedLocation] = useState("")
+    const [sortBy] = useState("featured")
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -41,7 +41,7 @@ export default function CompaniesPage() {
                     setError("Failed to load companies")
                 }
             } catch (err) {
-                setError("An error occurred while fetching companies")
+                setError("An error occurred while fetching companies: " + err)
             } finally {
                 setLoading(false)
             }

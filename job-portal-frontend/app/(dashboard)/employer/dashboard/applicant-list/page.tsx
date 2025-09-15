@@ -8,6 +8,7 @@ import {
     MapPin,
     Building,
     Mail,
+    User2,
     Phone,
     User,
     FileText,
@@ -306,6 +307,16 @@ export default function EmployerApplicationsPage() {
                                                 Download Resume
                                             </a>
                                         )}
+                                        <button className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors font-medium">
+                                            <User2 className="w-4 h-4" />
+                                            <Link
+
+                                                href={`/employer/dashboard/applicant/${application.user.id}`}
+                                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                            >
+                                                View Applicant
+                                            </Link>
+                                        </button>
                                     </div>
 
                                     {/* Status Management */}
@@ -409,6 +420,7 @@ export default function EmployerApplicationsPage() {
                                 >
                                     Close
                                 </button>
+
                             </div>
                         </div>
                     </div>

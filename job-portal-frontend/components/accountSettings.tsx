@@ -61,8 +61,12 @@ export default function AccountSettings({ user }: AccountSettingsProps) {
             });
 
             setMessage(res.data.message || "Account updated successfully!");
-        } catch (err: any) {
-            setMessage(err.response?.data?.message || "Something went wrong!");
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setMessage(err.response?.data?.message || "Something went wrong!");
+            } else {
+                setMessage("Something went wrong!");
+            }
         } finally {
             setIsSaving(false);
         }

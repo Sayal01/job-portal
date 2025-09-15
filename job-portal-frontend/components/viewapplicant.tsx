@@ -29,15 +29,13 @@ import { Separator } from "@/components/ui/separator"
 type Education = {
     institution: string
     degree: string
-    start_date: string
-    end_date: string
+    year: string
 }
 
 type WorkExperience = {
     company: string
     position: string
-    start_date: string
-    end_date: string
+    years: string
 }
 
 type JobSeekerProfile = {
@@ -150,7 +148,7 @@ export default function EmployerViewApplicantPage() {
                                 {localUser.first_name} {localUser.last_name}
                             </h1>
                         </div>
-                        {/* <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3">
                             <Button variant="outline" size="lg">
                                 <Mail className="w-4 h-4 mr-2" />
                                 Contact
@@ -159,7 +157,7 @@ export default function EmployerViewApplicantPage() {
                                 <Star className="w-4 h-4 mr-2" />
                                 Shortlist
                             </Button>
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -258,7 +256,7 @@ export default function EmployerViewApplicantPage() {
                                                     <p className="text-muted-foreground font-medium mb-2">{edu.degree}</p>
                                                     <div className="flex items-center text-sm text-muted-foreground">
                                                         <Calendar className="w-3 h-3 mr-1" />
-                                                        {edu.start_date} - {edu.end_date}
+                                                        {edu.year}
                                                     </div>
                                                 </div>
                                             </div>
@@ -301,7 +299,7 @@ export default function EmployerViewApplicantPage() {
                                                     </div>
                                                     <div className="flex items-center text-sm text-muted-foreground">
                                                         <Calendar className="w-3 h-3 mr-1" />
-                                                        {work.start_date} - {work.end_date}
+                                                        {work.years}
                                                     </div>
                                                 </div>
                                             </div>
@@ -357,7 +355,7 @@ export default function EmployerViewApplicantPage() {
                             </CardContent>
                         </Card>
 
-                        {/* <Card className="border-0 shadow-lg">
+                        <Card className="border-0 shadow-lg">
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Quick Actions</CardTitle>
                             </CardHeader>
@@ -375,7 +373,7 @@ export default function EmployerViewApplicantPage() {
                                     Add to Favorites
                                 </Button>
                             </CardContent>
-                        </Card> */}
+                        </Card>
                     </div>
                 </div>
             </div>

@@ -163,7 +163,7 @@ export const AppProvider = ({
         setNotifications([]);
         setIsLoading(false);
         toast.success("Logout Successful");
-        router.push("/auth/login");
+        router.push("/");
     }
     return (
         <AppContext.Provider value={{ login, register, isLoading, authToken, user, logout, notifications, setNotifications }}>

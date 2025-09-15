@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-import { MapPin, Clock, DollarSign, Building, Users, Calendar } from "lucide-react";
-import Image from "next/image";
+import { MapPin, Clock, Building, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { API_IMG, API_URL } from "@/lib/config";

@@ -18,11 +18,11 @@ use App\Http\Controllers\NotificationController;
 
 Route::post("/register", [AuthController::class, 'register']);
 Route::post("/login", [AuthController::class, 'login']);
-
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
 Route::get('/jobs', [JobController::class, 'index']); // anyone can see job list
+Route::get('/jobs/search', [JobController::class, 'search']); // search with filters
 Route::get('/jobs/{job}', [JobController::class, 'show']); // anyone can see job details
 Route::get('/companies', [CompanyController::class, 'index']);
 Route::get('/companies/{company}', [CompanyController::class, 'show']);
@@ -45,9 +45,9 @@ Route::middleware(['auth:sanctum', 'can:admin'])->prefix('admin')->group(functio
     Route::post('/departments/add', [DepartmentController::class, 'store']);
     Route::put('/departments/{department}', [DepartmentController::class, 'update']);
     Route::delete('/departments/{department}', [DepartmentController::class, 'destroy']);
-    Route::get('/jobs', [JobController::class, 'adminIndex']);
-    Route::put('/jobs/{job}', [JobController::class, 'adminUpdate']);
-    Route::delete('/jobs/{job}', [JobController::class, 'adminDestroy']);
+    Route::get('/jobs', [AdminController::class, 'adminIndex']);
+    Route::put('/jobs/{job}', [AdminController::class, 'adminUpdate']);
+    Route::delete('/jobs/{job}', [AdminController::class, 'adminDestroy']);
 });
 
 

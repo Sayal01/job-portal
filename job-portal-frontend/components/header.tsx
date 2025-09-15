@@ -30,7 +30,7 @@ interface LocalUser {
 }
 
 export function Header() {
-    const { logout, authToken, user, notifications, setNotifications } = myAppHook();
+    const { logout, authToken, notifications, setNotifications } = myAppHook();
     // const [notifications, setNotifications] = useState<any[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [localUser, setLocalUser] = useState<LocalUser | null>(null);
@@ -151,15 +151,15 @@ export function Header() {
                                             </div>
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem>
+                                        {/* <DropdownMenuItem>
                                             <User className="mr-2 h-4 w-4" />
                                             <span>Profile</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => router.push(`/account`)}>
+                                        </DropdownMenuItem> */}
+                                        {/* <DropdownMenuItem onClick={() => router.push(`/account`)}>
                                             <Settings className="mr-2 h-4 w-4" />
                                             <span>Settings</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
+                                        </DropdownMenuItem> */}
+                                        {/* <DropdownMenuSeparator /> */}
                                         <DropdownMenuItem onClick={() => router.push(`/${localUser?.role}/dashboard`)}>
                                             <Settings className="mr-2 h-4 w-4" />
                                             <span>Dashboard</span>

@@ -111,10 +111,10 @@ const CompanyPage: React.FC = () => {
             } else {
                 alert("Failed to save company info.");
             }
-        } catch (error: any) {
-            if (error.response && error.response.data) {
-                console.error("Validation errors:", error.response.data);
-                alert("Validation failed: " + JSON.stringify(error.response.data.errors));
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                console.error("Validation errors:", error.response?.data);
+                alert("Validation failed: " + JSON.stringify(error.response?.data.errors));
             } else {
                 console.error("Failed to save:", error);
                 alert("Failed to save company info.");

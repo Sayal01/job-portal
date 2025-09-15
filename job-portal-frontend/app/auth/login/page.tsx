@@ -10,17 +10,15 @@ import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Briefcase, Eye, EyeOff, Mail, Lock } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { myAppHook } from "@/context/AppProvider"
-import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/config"
 
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false)
-    const { login, authToken } = myAppHook();
+    const { login } = myAppHook();
     const [showForgotModal, setShowForgotModal] = useState(false);
 
 
@@ -40,7 +38,7 @@ export default function LoginPage() {
             await login({ email: formData.email, password: formData.password })
         }
         catch (error) {
-            console.log("authentication error")
+            console.log("authentication error", error)
         }
         finally {
             setIsLoading(false)
@@ -152,7 +150,7 @@ export default function LoginPage() {
                         {/* Sign up link */}
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
-                                Don't have an account?{" "}
+                                Don&apos;t have an account?{" "}
                                 <Link href="/auth/register" className="text-blue-600 hover:underline font-medium">
                                     Sign up
                                 </Link>
@@ -182,7 +180,7 @@ export default function LoginPage() {
                                         alert("Password reset link sent to your email.");
                                         setShowForgotModal(false);
                                     } catch (err) {
-                                        alert("Error sending reset link.");
+                                        alert("Error sending reset link." + err);
                                     }
                                 }}
                                 className="space-y-4"

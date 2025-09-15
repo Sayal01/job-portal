@@ -1,8 +1,8 @@
 "use client"
 import { myAppHook } from "@/context/AppProvider"
-import { JobSearch } from "@/components/job-search"
+
 import { JobListings } from "@/components/job-listings"
-import { Header } from "@/components/header"
+
 
 
 export default function HomePage() {

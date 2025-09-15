@@ -11,9 +11,6 @@ import {
     Settings,
     Building,
     Search,
-    BookmarkIcon,
-    MessageSquare,
-    Calendar,
     User,
 } from "lucide-react"
 import Link from "next/link"
@@ -31,24 +28,24 @@ const sidebarItems = {
         { title: "Applications", href: "/admin/dashboard/application-list", icon: Users },
         // { title: "Employers", href: "/dashboard/employers", icon: Building },
         { title: "Departments", href: "/admin/dashboard/department-list", icon: BarChart3 },
-        { title: "Settings", href: "/dashboard/settings", icon: Settings },
+        { title: "Settings", href: "/account", icon: Settings },
     ],
     "job_seeker": [
-        { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { title: "Dashboard", href: "/job_seeker/dashboard", icon: LayoutDashboard },
         { title: "Find Jobs", href: "/", icon: Search },
         { title: "My Applications", href: "/job_seeker/dashboard/application", icon: FileText },
         // { title: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
         // { title: "Messages", href: "/dashboard/messages", icon: MessageSquare },
         // { title: "Interviews", href: "/dashboard/interviews", icon: Calendar },
         { title: "Profile", href: "/job_seeker/dashboard/profile", icon: User },
-        { title: "Settings", href: "/dashboard/settings", icon: Settings },
+        { title: "Settings", href: "/account", icon: Settings },
     ],
     "employer": [
         { title: "Dashboard", href: "/employer", icon: LayoutDashboard },
         { title: "Post Job", href: "/employer/dashboard/post-job", icon: Briefcase },
         { title: "My Jobs", href: "/employer/dashboard/my-job-list", icon: Briefcase },
         { title: "Applications", href: "/employer/dashboard/applicant-list", icon: FileText },
-        // { title: "Candidates", href: "employer/dashboard/candidates", icon: Users },
+        { title: "Interviews", href: "/employer/dashboard/interview-round", icon: Users },
         // { title: "Messages", href: "/dashboard/messages", icon: MessageSquare },
         // { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
         { title: "Company Profile", href: "/employer/dashboard/company", icon: Building },
@@ -61,7 +58,7 @@ export function DashboardSidebar({ userType }: DashboardSidebarProps) {
     const items = sidebarItems[userType]
 
     return (
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen space-y-3.5">
+        <div className="w-64 h- h-full bg-white shadow-sm border-r min-h-screen space-y-3.5">
             <nav className="p-4 space-y-1  ">
                 {items.map((item) => {
                     const Icon = item.icon

@@ -1,15 +1,28 @@
 "use client"
 import { JobSearch } from "@/components/job-search"
 import { JobListings } from "@/components/job-listings"
-import Loader from "@/components/Loader"
-import { DashboardHeader } from "@/components/dashboard-header";
-import { use } from "react"
-import { myAppHook } from "@/context/AppProvider"
-import RecommendedJobs from "@/components/RecommendedJobs";
+
+import { useState, useEffect } from "react";
+import { API_URL } from "@/lib/config";
+import axios from "axios";
+interface Department {
+  id: string;
+  name: string;
+}
 
 export default function HomePage() {
-  const { user } = myAppHook();
-  console.log(user)
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
+
+  useEffect(() => {
+    // Fetch departments once
+    axios.get(`${API_URL}/departments`)
+      .then(res => setDepartments(res.data.departments || []))
+      .catch(err => console.error(err));
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -19,8 +32,25 @@ export default function HomePage() {
             Discover thousands of job opportunities from top companies
           </p>
         </div>
-        {/* <JobSearch /> */}
-        <JobListings />
+        <div className="max-h-[70vh] overflow-auto">
+          <JobSearch
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            typeFilter={typeFilter}
+            setTypeFilter={setTypeFilter}
+            departmentFilter={departmentFilter}
+            setDepartmentFilter={(value) => setDepartmentFilter(value === "all" ? "" : value)}
+            departments={departments}
+          />
+        </div>
+        <JobListings
+          searchQuery={searchQuery}
+          locationFilter={locationFilter}
+          typeFilter={typeFilter}
+          selectedDepartment={departmentFilter}
+        />
       </div>
     </div>
   )

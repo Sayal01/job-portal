@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Briefcase, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
+
 import { Button } from "@/components/ui/button"
 
 // ✅ Type for a single company (matches your backend)
@@ -47,7 +47,7 @@ export default function CompanyDetailsPage() {
                     setError("Company not found")
                 }
             } catch (err) {
-                setError("Failed to load company details")
+                setError("Failed to load company details" + err)
             } finally {
                 setLoading(false)
             }

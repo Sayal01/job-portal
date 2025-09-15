@@ -1,31 +1,104 @@
 "use client";
+
 import { markNotificationAsRead, clearReadNotifications } from "../lib/notification";
 
-interface NotificationType {
+interface InterviewScheduledData {
+    job_title: string;
+    round_number: number;
+    scheduled_at: string;
+    interviewer_name: string;
+}
+
+interface InterviewUpdateData {
+    job_title: string;
+    round_number: number;
+    status: "passed" | "failed" | "completed" | "scheduled";
+    scheduled_at?: string;
+    interviewer_name?: string;
+}
+
+interface ApplicationStatusData {
+    job_title: string;
+    status: "pending" | "shortlisted" | "in_interview" | "selected" | "rejected";
+}
+
+type NotificationData =
+    | InterviewScheduledData
+    | InterviewUpdateData
+    | ApplicationStatusData;
+
+export interface NotificationType {
     id: number;
-    type: string;
-    data: any;
+    type: "interview_scheduled" | "interview_update" | "application_status_update" | string;
+    data: NotificationData;
     read: boolean;
     created_at: string;
+}
+
+interface NotificationsDropdownProps {
+    notifications: NotificationType[];
+    setNotifications: React.Dispatch<React.SetStateAction<NotificationType[]>>;
 }
 
 export default function NotificationsDropdown({
     notifications = [],
     setNotifications,
-}: {
-    notifications: NotificationType[];
-    setNotifications: React.Dispatch<React.SetStateAction<NotificationType[]>>;
-}) {
+}: NotificationsDropdownProps) {
     const handleMarkAsRead = async (id: number) => {
         await markNotificationAsRead(id);
         setNotifications(prev =>
-            prev.map(n => n.id === id ? { ...n, read: true } : n)
+            prev.map(n => (n.id === id ? { ...n, read: true } : n))
         );
     };
 
     const handleClearRead = async () => {
         await clearReadNotifications();
         setNotifications(prev => prev.filter(n => !n.read));
+    };
+
+    const renderMessage = (n: NotificationType) => {
+        switch (n.type) {
+            case "interview_scheduled": {
+                const d = n.data as InterviewScheduledData;
+                return `Your interview for ${d.job_title} (Round ${d.round_number}) is scheduled at ${new Date(
+                    d.scheduled_at
+                ).toLocaleString()} with ${d.interviewer_name}.`;
+            }
+            case "interview_update": {
+                const d = n.data as InterviewUpdateData;
+                switch (d.status) {
+                    case "passed":
+                        return `Congrats! You passed Round ${d.round_number} for ${d.job_title}.`;
+                    case "failed":
+                        return `We’re sorry. You failed Round ${d.round_number} for ${d.job_title}.`;
+                    case "completed":
+                        return `Your interview for ${d.job_title} (Round ${d.round_number}) was completed.`;
+                    case "scheduled":
+                        return `Your interview for ${d.job_title} (Round ${d.round_number}) is scheduled at ${new Date(
+                            d.scheduled_at!
+                        ).toLocaleString()} with ${d.interviewer_name}.`;
+                    default:
+                        return `Interview update for ${d.job_title} (Round ${d.round_number}).`;
+                }
+            }
+            case "application_status_update": {
+                const d = n.data as ApplicationStatusData;
+                switch (d.status) {
+                    case "pending":
+                        return `Your application for ${d.job_title} has been received.`;
+                    case "shortlisted":
+                        return `Your application for ${d.job_title} has been shortlisted.`;
+                    case "in_interview":
+                        return `Your application for ${d.job_title} is in the interview stage.`;
+                    case "selected":
+                        return `Congratulations! Your application for ${d.job_title} has been selected.`;
+                    case "rejected":
+                        return `Your application for ${d.job_title} has been rejected.`;
+                }
+            }
+            default:
+                return `You have a new application.`;
+        }
     };
 
     return (
@@ -35,64 +108,24 @@ export default function NotificationsDropdown({
                 {notifications.length === 0 && (
                     <li className="p-2 text-gray-500">No notifications</li>
                 )}
-                {notifications.map(n => {
-                    let message = "";
-
-                    if (n.type === "interview_scheduled") {
-                        message = `Your interview for ${n.data.job_title} (Round ${n.data.round_number}) is scheduled at ${new Date(n.data.scheduled_at).toLocaleString()} with ${n.data.interviewer_name}.`;
-                    } else if (n.type === "interview_update") {
-                        switch (n.data.status) {
-                            case "passed":
-                                message = `Congrats! You passed Round ${n.data.round_number} for ${n.data.job_title}.`;
-                                break;
-                            case "failed":
-                                message = `We’re sorry. You failed Round ${n.data.round_number} for ${n.data.job_title}.`;
-                                break;
-                            case "completed":
-                                message = `Your interview for ${n.data.job_title} (Round ${n.data.round_number}) was completed.`;
-                                break;
-                            case "scheduled":
-                                message = `Your interview for ${n.data.job_title} (Round ${n.data.round_number}) is scheduled at ${new Date(n.data.scheduled_at).toLocaleString()} with ${n.data.interviewer_name}.`;
-                                break;
-                            default:
-                                message = `Interview update for ${n.data.job_title} (Round ${n.data.round_number}).`;
-                        }
-                    } else if (n.type === "application_status_update") {
-                        switch (n.data.status) {
-                            case 'pending':
-                                message = `Your application for ${n.data.job_title} has been received.`;
-                                break;
-                            case 'shortlisted':
-                                message = `Your application for ${n.data.job_title} has been shortlisted.`;
-                                break;
-                            case 'in_interview':
-                                message = `Your application for ${n.data.job_title} is in the interview stage.`;
-                                break;
-                            case 'selected':
-                                message = `Congratulations! Your application for ${n.data.job_title} has been selected.`;
-                                break;
-                            case 'rejected':
-                                message = `Your application for ${n.data.job_title} has been rejected.`;
-                                break;
-                        }
-                    } else {
-                        message = `You have a new application for ${n.data.job_title}.`;
-                    }
-
-                    return (
-                        <li key={n.id} className={`p-2 border-b ${n.read ? "bg-gray-100" : "bg-white"}`}>
-                            <p>{message}</p>
-                            {!n.read && (
-                                <button onClick={() => handleMarkAsRead(n.id)} className="text-blue-500 text-sm">
-                                    Mark as read
-                                </button>
-                            )}
-                        </li>
-                    );
-                })}
+                {notifications.map(n => (
+                    <li
+                        key={n.id}
+                        className={`p-2 border-b ${n.read ? "bg-gray-100" : "bg-white"}`}
+                    >
+                        <p>{renderMessage(n)}</p>
+                        {!n.read && (
+                            <button
+                                onClick={() => handleMarkAsRead(n.id)}
+                                className="text-blue-500 text-sm"
+                            >
+                                Mark as read
+                            </button>
+                        )}
+                    </li>
+                ))}
             </ul>
 
-            {/* Clear all read notifications button */}
             {notifications.some(n => n.read) && (
                 <button
                     onClick={handleClearRead}

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +14,7 @@ interface CompanyCardProps {
 }
 
 export function CompanyCard({ company }: CompanyCardProps) {
-    const [isFollowing, setIsFollowing] = useState(false)
+    // const [isFollowing, setIsFollowing] = useState(false)
 
     return (
         <Card className="group hover:shadow-lg transition-all duration-200 border-gray-200 hover:border-gray-300 relative overflow-hidden">

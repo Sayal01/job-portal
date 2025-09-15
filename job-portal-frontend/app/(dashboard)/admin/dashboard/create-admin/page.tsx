@@ -21,8 +21,12 @@ export default function CreateAdmin() {
             const res = await axios.post(`${API_URL}/admin/user/create`, form, { headers: { Authorization: `Bearer ${token}` } });
             toast.success(res.data.message);
             setForm({ name: "", email: "", password: "", password_confirmation: "" });
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Error creating admin");
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                toast.error(err.response?.data?.message || "Error creating admin");
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         } finally {
             setLoading(false);
         }

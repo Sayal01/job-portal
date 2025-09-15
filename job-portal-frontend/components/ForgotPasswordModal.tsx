@@ -20,7 +20,7 @@ export default function ForgotPasswordModal() {
             setIsOpen(false);
             setEmail("");
         } catch (err) {
-            toast.error("Failed to send reset link.");
+            toast.error("Failed to send reset link." + err);
         }
     };
 

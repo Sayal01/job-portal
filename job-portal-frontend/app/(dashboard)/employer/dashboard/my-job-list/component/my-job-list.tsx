@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Eye, Edit, Users, Calendar, MapPin, DollarSign, Plus, Briefcase, Clock } from "lucide-react"
+import { Eye, Edit, Users, Calendar, MapPin, DollarSign, Plus, Briefcase, Clock, Trash2, } from "lucide-react"
 import Loader from "@/components/Loader"
 import { API_URL } from '@/lib/config'
 import { myAppHook } from "@/context/AppProvider"
 import axios from "axios"
 import { useRouter } from "next/navigation";
-
+import toast from "react-hot-toast"
 interface myJob {
     id: string,
     title: string,
@@ -27,7 +27,7 @@ interface myJob {
 }
 
 export function MyJobsList() {
-    const { authToken, isLoading } = myAppHook()
+    const { authToken } = myAppHook()
     const [jobs, setJobs] = useState<myJob[]>()
     const [loading, setLoading] = useState(true)
     const router = useRouter();
@@ -54,6 +54,22 @@ export function MyJobsList() {
         }
     }, [authToken])
 
+    async function deleteJob(id: string) {
+        if (!confirm("Are you sure you want to delete this job?")) return;
+
+        try {
+            await axios.delete(`${API_URL}/jobs/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            });
+            toast.success(`job deleted successfully`);
+            setJobs(prev => prev?.filter(job => job.id !== id));
+        } catch (error) {
+            console.error("Delete Job error:", error);
+            toast.error("Failed to delete job");
+        }
+    }
     const handleViewApplicants = (jobId: string) => {
         router.push(`/employer/dashboard/applicant-list/${jobId}`);
     };
@@ -213,7 +229,13 @@ export function MyJobsList() {
                                                 >
                                                     <Edit className="h-5 w-5" />
                                                 </Link>
-
+                                                <button
+                                                    onClick={() => deleteJob(job.id)}
+                                                    title="Delete Job"
+                                                    className="p-3 text-red-500 hover:text-red-700 hover:bg-red-100  rounded-xl transition-all duration-200 border border-green-200 hover:border-green-300"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
                                                 <button
                                                     onClick={() => handleViewApplicants(job.id)}
                                                     className="px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2"

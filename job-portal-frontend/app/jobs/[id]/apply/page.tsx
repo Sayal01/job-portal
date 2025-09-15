@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Header } from "@/components/header";
 import { ArrowLeft } from "lucide-react";
 import { API_URL } from "@/lib/config";
 import { useParams } from "next/navigation";
@@ -36,6 +35,7 @@ export default function JobApplicationPage() {
                 const resume = res.data.resume_file;
                 setHasResume(!!resume);
             } catch (err) {
+                console.error("error checking resume:", err)
                 setHasResume(false);
             }
         };
@@ -68,7 +68,7 @@ export default function JobApplicationPage() {
                 alert("Application submitted successfully!");
                 router.push(`/jobs/${jobId}`);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to apply:", error);
             if (axios.isAxiosError(error)) {
                 alert(error.response?.data?.message || "Failed to submit application.");

@@ -1,6 +1,5 @@
 // components/ResetPasswordModal.tsx
 "use client";
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
@@ -44,7 +43,7 @@ export default function ResetPasswordModal() {
             setIsOpen(false);
             setTimeout(() => router.push("/auth/login"), 2000); // redirect after 2s
         } catch (err) {
-            toast.error("Failed to reset password");
+            toast.error("Failed to reset password" + err);
         }
     };
 

@@ -6,11 +6,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { API_URL } from "@/lib/config";
 
-interface fetchJobType {
-    jobs: Job[];
-    status: string;
-}
-
+import SkeletonCard from "./skeletonCards";
 interface Company {
     id: string;
     user_id: string;
@@ -19,11 +15,6 @@ interface Company {
     website: string;
     created_at: string;
     updated_at: string;
-}
-
-interface Department {
-    id: string;
-    name: string;
 }
 
 interface Job {
@@ -42,62 +33,72 @@ interface Job {
     skills: string[] | null;
 }
 
-export function JobListings() {
+interface JobListingsProps {
+    searchQuery?: string;
+    locationFilter?: string;
+    typeFilter?: string;
+    selectedDepartment?: string;
+}
+
+export function JobListings({
+    searchQuery = "",
+    locationFilter = "",
+    typeFilter = "",
+    selectedDepartment = "",
+}: JobListingsProps) {
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
-    const [selectedDepartment, setSelectedDepartment] = useState<string>("");
     const [loading, setLoading] = useState(true);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
-    // Fetch all jobs and departments on mount or when department changes
+    const getJobsUrl = () =>
+        searchQuery || locationFilter || typeFilter
+            ? `${API_URL}/jobs/search`
+            : selectedDepartment
+                ? `${API_URL}/departments/${selectedDepartment}/jobs`
+                : `${API_URL}/jobs`;
+
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                // Fetch all jobs or filtered jobs by department
-                const jobsUrl = selectedDepartment
-                    ? `${API_URL}/departments/${selectedDepartment}/jobs`
-                    : `${API_URL}/jobs`;
+        const delayDebounce = setTimeout(() => {
+            const fetchJobs = async () => {
+                setLoading(true);
+                try {
+                    const res = await axios.get(getJobsUrl(), {
+                        params:
+                            searchQuery || locationFilter || typeFilter
+                                ? {
+                                    q: searchQuery || undefined,
+                                    location: locationFilter || undefined,
+                                    ...(typeFilter && typeFilter !== "all" ? { type: typeFilter } : {}),
+                                }
+                                : undefined,
+                    });
+                    setJobs(Array.isArray(res.data.jobs) ? res.data.jobs : []);
+                    setCurrentPage(1);
+                } catch (err) {
+                    toast.error("Failed to load jobs");
+                    console.error(err);
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-                const [jobsRes, departmentsRes] = await Promise.all([
-                    axios.get(jobsUrl),
-                    axios.get(`${API_URL}/departments`),
-                ]);
+            fetchJobs();
+        }, 500);
+        return () => clearTimeout(delayDebounce);
+    }, [searchQuery, locationFilter, typeFilter, selectedDepartment]);
 
-                setJobs(Array.isArray(jobsRes.data.jobs) ? jobsRes.data.jobs : []);
-                setDepartments(departmentsRes.data.departments);
-
-                setCurrentPage(1); // Reset page to 1 on new fetch
-            } catch (error) {
-                toast.error("Failed to load jobs or departments");
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [selectedDepartment]);
 
     // Pagination calculations
-    const totalPages = Math.ceil(jobs.length / pageSize);
+    const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
     const paginatedJobs = jobs.slice(
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
 
-    // Handle department select change
-    const handleDepartmentChange = (deptId: string) => {
-        setSelectedDepartment(deptId);
-        // currentPage reset happens in useEffect after data fetch
-    };
 
-    if (loading) {
-        return <div>Loading jobs...</div>;
-    }
 
     return (
         <div>
@@ -105,37 +106,24 @@ export function JobListings() {
                 <h2 className="text-2xl font-semibold text-gray-900">
                     Latest Job Opportunities
                 </h2>
-                <span className="text-gray-600">
-                    {jobs.length} jobs found
-                </span>
-            </div>
-
-            {/* Department Filter */}
-            <div className="mb-4 flex items-center gap-4">
-                <label htmlFor="department" className="text-sm font-medium">
-                    Filter by Department:
-                </label>
-                <select
-                    id="department"
-                    className="border p-2 rounded"
-                    value={selectedDepartment}
-                    onChange={(e) => handleDepartmentChange(e.target.value)}
-                >
-                    <option value="">All Departments</option>
-                    {departments.map((dep) => (
-                        <option key={dep.id} value={dep.id}>
-                            {dep.name}
-                        </option>
-                    ))}
-                </select>
+                <span className="text-gray-600">{jobs.length} jobs found</span>
             </div>
 
             {/* Job Cards */}
-            <div className="grid  grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 min-h-[200px]">
+                {loading
+                    ? Array.from({ length: pageSize }).map((_, i) => <SkeletonCard key={i} />)
+                    : jobs.length === 0
+                        ? <div className="text-center text-gray-500 mt-10">No jobs found.</div>
+                        : paginatedJobs.map((job) => <JobCard key={job.id} job={job} />)
+                }
+            </div>
+
+            {/* <div className="grid grid-cols-1 gap-4 " >
                 {paginatedJobs.map((job) => (
                     <JobCard key={job.id} job={job} />
                 ))}
-            </div>
+            </div> */}
 
             {/* Pagination Controls */}
             <div className="flex justify-center items-center mt-6 gap-4">
