@@ -317,8 +317,9 @@ export default function EmployerInterviewRoundsPage() {
                                                     </div>
                                                 ))}
 
-                                                {(candidate.interviews.length === 0 ||
-                                                    candidate.interviews[candidate.interviews.length - 1].status === "passed") && (
+                                                {(candidate.interviews.length < 3 &&
+                                                    (candidate.interviews.length === 0 ||
+                                                        candidate.interviews[candidate.interviews.length - 1].status === "passed")) && (
                                                         <div className="pt-2">
                                                             <CustomButton
                                                                 variant="outline"
@@ -329,6 +330,7 @@ export default function EmployerInterviewRoundsPage() {
                                                             </CustomButton>
                                                         </div>
                                                     )}
+
                                             </div>
                                         </div>
                                     )}

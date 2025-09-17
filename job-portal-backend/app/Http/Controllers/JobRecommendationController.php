@@ -88,7 +88,7 @@ class JobRecommendationController extends Controller
         // Experience score
         $candidateExp = $this->calculateTotalExperience($candidate['work_experiences'] ?? []);
 
-        error_log('Candidate total experience: ' . $candidateExp);
+        // error_log('Candidate total experience: ' . $candidateExp);
 
         $minExp = $job['min_experience'] ?? 0;
         $maxExp = $job['max_experience'] ?? 0;
@@ -223,6 +223,11 @@ class JobRecommendationController extends Controller
         }
 
         usort($results, fn($a, $b) => $b['score'] <=> $a['score']);
+        // Keep only jobs with score >= 0.5
+        $results = array_filter($results, fn($job) => $job['score'] >= 0.5);
+
+        // Reindex array after filtering
+        $results = array_values($results);
 
         return response()->json([
             'status' => true,

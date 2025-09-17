@@ -73,7 +73,7 @@ function EmployerDashboard() {
                 setActiveJobs(jobsRes.data.data)
                 setRecentApplications(applicationsRes.data.data)
             } catch (err) {
-                console.error("Failed to fetch employer dashboard data:", err)
+                console.log("Failed to fetch employer dashboard data:", err)
             }
         }
 

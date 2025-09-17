@@ -38,10 +38,7 @@ export default function RegisterPage() {
             return
         }
 
-        if (!formData.agreeToTerms) {
-            alert("Please agree to the terms and conditions")
-            return
-        }
+
 
         setIsLoading(true)
 
@@ -68,7 +65,7 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 scheme-light">
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="text-center mb-8">
@@ -215,7 +212,7 @@ export default function RegisterPage() {
                             </div>
 
                             {/* Terms agreement */}
-                            <div className="flex items-start space-x-2">
+                            {/* <div className="flex items-start space-x-2">
                                 <Checkbox
                                     id="terms"
                                     checked={formData.agreeToTerms}
@@ -231,7 +228,7 @@ export default function RegisterPage() {
                                         Privacy Policy
                                     </Link>
                                 </Label>
-                            </div>
+                            </div> */}
 
                             {/* Submit button */}
                             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -242,14 +239,14 @@ export default function RegisterPage() {
                         {/* Divider */}
                         <div className="my-6">
                             <Separator />
-                            <div className="relative">
+                            {/* <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
                                     <span className="w-full border-t" />
                                 </div>
                                 <div className="relative flex justify-center text-xs uppercase">
                                     <span className="bg-white px-2 text-gray-500">Or continue with</span>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
 

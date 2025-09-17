@@ -5,7 +5,7 @@ import RecommendedJobs from "@/components/RecommendedJobs";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_URL } from "@/lib/config";
-import App from "next/app";
+
 import toast from "react-hot-toast";
 
 
@@ -33,7 +33,16 @@ export default function SeekerDashboard() {
     const [activeApplications, setActiveApplications] = useState<Application[]>([]);
     const [loadingApplications, setLoadingApplications] = useState(true);
     const authToken = Cookies.get("AuthToken");
-    const userName = Cookies.get("UserName") || "Seeker";
+    const [userName, setUserName] = useState("");
+
+    useEffect(() => {
+        const user = Cookies.get("user");
+        if (user) {
+            const firstName = JSON.parse(user).first_name;
+            setUserName(firstName.charAt(0).toUpperCase() + firstName.slice(1));
+        }
+    }, []);
+
 
 
     useEffect(() => {
@@ -47,7 +56,7 @@ export default function SeekerDashboard() {
                 });
                 setActiveApplications(response.data || []);
             } catch (error) {
-                console.error("Error fetching active applications:", error);
+                console.log("Error fetching active applications:", error);
             } finally {
                 setLoadingApplications(false);
             }
@@ -69,7 +78,7 @@ export default function SeekerDashboard() {
             setActiveApplications((prev) => prev.filter((app) => app.id !== id));
         } catch (error) {
             toast.error("Failed to cancel application");
-            console.error(error);
+            console.log(error);
         }
     };
     const recentApplications = [...activeApplications].sort(

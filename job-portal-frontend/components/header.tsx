@@ -93,29 +93,31 @@ export function Header() {
                     {/* Actions */}
                     <div className="flex items-center gap-3">
                         {/* Notifications Dropdown */}
-                        <div className="relative">
-                            {/* Notification Icon */}
-                            <button onClick={() => setShowDropdown(prev => !prev)} className="relative">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                {unreadCount > 0 && (
-                                    <span className="absolute top-0 right-0 bg-red-500 text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
+                        {authToken && (
+                            <div className="relative">
+                                {/* Notification Icon */}
+                                <button onClick={() => setShowDropdown(prev => !prev)} className="relative">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-0 right-0 bg-red-500 text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </button>
 
-                            {/* Dropdown */}
-                            {showDropdown && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white text-black shadow-lg rounded z-50">
-                                    <NotificationsDropdown
-                                        notifications={notifications}
-                                        setNotifications={setNotifications}
-                                    />
-                                </div>
-                            )}
-                        </div>
+                                {/* Dropdown */}
+                                {showDropdown && (
+                                    <div className="absolute right-0 mt-2 w-80 bg-white text-black shadow-lg rounded z-50">
+                                        <NotificationsDropdown
+                                            notifications={notifications}
+                                            setNotifications={setNotifications}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         {!authToken ? (
                             <Button asChild variant="ghost" size="sm">
                                 <a href="/auth/login">

@@ -163,9 +163,9 @@ class JobInterviewController extends Controller
             $passedRounds = $application->interviews()->where('status', 'passed')->count();
 
             // Only update to 'selected' if 3 rounds are passed
-            // if ($passedRounds >= 3) {
-            //     $application->update(['status' => 'selected']);
-            // }
+            if ($passedRounds >= 3) {
+                $application->update(['status' => 'selected']);
+            }
         }
         Notification::create([
             'user_id' => $candidate->id,

@@ -20,7 +20,8 @@ type Job = {
     department_id: number;
     location: string;
     type: string;
-    experience_level: string;
+    min_experience: string;
+    max_experience: string;
     salary_min: string;
     salary_max: string;
     responsibilities: string[];
@@ -56,7 +57,7 @@ export default function RecommendedJobs() {
                     setRecommendations(response.data.recommendations);
                 }
             } catch (error) {
-                console.error("Error fetching recommendations:", error);
+                console.log("Error fetching recommendations:", error);
             } finally {
                 setLoading(false);
             }
@@ -75,7 +76,7 @@ export default function RecommendedJobs() {
 
     return (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendations.map((rec) => (
+            {recommendations.slice(0, 6).map((rec) => (
                 <Card key={rec.job.id} className="hover:shadow-lg transition">
                     <CardHeader>
                         <CardTitle className="text-lg">{rec.job.title}</CardTitle>
@@ -90,7 +91,7 @@ export default function RecommendedJobs() {
                     <CardContent className="space-y-2">
                         <p className="text-sm text-gray-600">
                             <Briefcase className="inline w-4 h-4 mr-1" />
-                            {rec.job.type} | {rec.job.experience_level}
+                            {rec.job.type} | {rec.job.min_experience} - {rec.job.max_experience} years experience
                         </p>
                         <p className="text-sm text-gray-600">
                             <MapPin className="inline w-4 h-4 mr-1" />

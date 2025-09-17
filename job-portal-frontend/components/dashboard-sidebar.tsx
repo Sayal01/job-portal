@@ -26,8 +26,8 @@ const sidebarItems = {
         { title: "Jobs", href: "/admin/dashboard/jobs", icon: Briefcase },
         { title: "users", href: "/admin/dashboard/users", icon: FileText },
         { title: "Applications", href: "/admin/dashboard/application-list", icon: Users },
-        // { title: "Employers", href: "/dashboard/employers", icon: Building },
         { title: "Departments", href: "/admin/dashboard/department-list", icon: BarChart3 },
+        { title: "Add Admin", href: "/admin/dashboard/create-admin", icon: Users },
         { title: "Settings", href: "/account", icon: Settings },
     ],
     "job_seeker": [

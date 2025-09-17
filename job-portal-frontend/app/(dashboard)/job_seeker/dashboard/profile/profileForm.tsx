@@ -105,7 +105,7 @@ export function JobSeekerProfileForm() {
                     image: user.image || null,
                 })
             } catch (error) {
-                console.error("Failed to fetch user:", error)
+                console.log("Failed to fetch user:", error)
             }
         }
 
@@ -141,7 +141,7 @@ export function JobSeekerProfileForm() {
                     setMode("view")
                 }
             } catch (error) {
-                console.error("Failed to fetch profile:", error)
+                console.log("Failed to fetch profile:", error)
                 setShowAddPrompt(true)
                 setMode("view")
             } finally {

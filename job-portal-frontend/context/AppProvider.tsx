@@ -89,7 +89,7 @@ export const AppProvider = ({
                 }
             });
 
-            if (response.data.status) {
+            if (response.data.status === true) {
                 Cookies.set("AuthToken", response.data.token, { expires: 7 })
                 Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 })
                 Cookies.set("Role", response.data.user.role, { expires: 7 });
@@ -99,9 +99,6 @@ export const AppProvider = ({
 
                 const notifData = await fetchNotifications();
                 setNotifications(notifData);
-
-
-
                 const role = response.data.user.role;
                 if (role === "job_seeker") {
                     router.push("/");
@@ -112,17 +109,29 @@ export const AppProvider = ({
                 } else {
                     router.push("/");  // fallback
                 }
+                console.log("Login response:", response.data);
+                console.log("Status type:", typeof response.data.status, "Value:", response.data.status);
             }
             else {
-                toast.success("invalid login details")
+                console.log("Login response:", response.data);
+                console.log("Status type:", typeof response.data.status, "Value:", response.data.status);
+                toast.error(response.data.message || "Invalid login details");
             }
 
             console.log("Login ", response.data);
         }
-        catch (error) {
-
+        catch (error: any) {
+            if (error.response) {
+                // Backend returned an error response
+                toast.error(error.response.data.message || "Invalid credentials");
+            } else {
+                // Network or other error
+                toast.error("Something went wrong. Please try again.");
+            }
+            console.log("Login error:", error);
         }
         finally {
+
             setIsLoading(false);
         }
     }

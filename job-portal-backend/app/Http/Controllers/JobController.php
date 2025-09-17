@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Job;
 use App\Services\JobRecommenderService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
 
 class JobController extends Controller
 {
@@ -16,8 +18,8 @@ class JobController extends Controller
 
 
             $jobs = Job::with('company', 'department')
-                // ->whereDate('start_date', '<=', $today)
-                // ->whereDate('application_deadline', '>=', $today)
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('application_deadline', '>=', $today)
                 ->latest()
                 ->get();
             return response()->json([
@@ -222,9 +224,6 @@ class JobController extends Controller
         return response()->json(['message' => 'Job deleted']);
     }
 
-
-
-
     public function recommendJobs(Request $request, JobRecommenderService $recommender)
     {
         $user = $request->user();
@@ -292,32 +291,132 @@ class JobController extends Controller
             'recomendations' => $result
         ]);
     }
+
+    // public function search(Request $request)
+    // {
+    //     $query    = $request->input('q');        // keyword
+    //     $location = $request->input('location'); // location filter
+    //     $type     = $request->input('type');     // job type filter
+
+    //     $jobs = Job::query()
+    //         ->when($query, function ($q) use ($query) {
+    //             $q->where(function ($sub) use ($query) {
+    //                 $sub->where('title', 'LIKE', "%{$query}%")
+    //                     ->orWhere('description', 'LIKE', "%{$query}%")
+    //                     ->orWhere('location', 'LIKE', "%{$query}%");
+    //             });
+    //         })
+    //         ->when($location, function ($q) use ($location) {
+    //             $q->where('location', 'LIKE', "%{$location}%");
+    //         })
+    //         ->when($type, function ($q) use ($type) {
+    //             $q->where('type', $type);
+    //         })
+    //         ->with(['company', 'department'])
+    //         ->get();
+
+    //     return response()->json([
+    //         'jobs'  => $jobs,
+    //         'count' => $jobs->count(),
+    //     ]);
+    // }
+
+
     public function search(Request $request)
     {
         $query    = $request->input('q');        // keyword
         $location = $request->input('location'); // location filter
         $type     = $request->input('type');     // job type filter
 
+        $k = 1.5;
+        $b = 0.75;
+
+        // Step 1: Fetch jobs filtered by location/type first
         $jobs = Job::query()
-            ->when($query, function ($q) use ($query) {
-                $q->where(function ($sub) use ($query) {
-                    $sub->where('title', 'LIKE', "%{$query}%")
-                        ->orWhere('description', 'LIKE', "%{$query}%")
-                        ->orWhere('location', 'LIKE', "%{$query}%");
-                });
-            })
-            ->when($location, function ($q) use ($location) {
-                $q->where('location', 'LIKE', "%{$location}%");
-            })
-            ->when($type, function ($q) use ($type) {
-                $q->where('type', $type);
-            })
+            ->when($location, fn($q) => $q->where('location', 'LIKE', "%{$location}%"))
+            ->when($type, fn($q) => $q->where('type', $type))
             ->with(['company', 'department'])
             ->get();
 
+        // If no query, just return filtered jobs
+        if (empty($query)) {
+            return response()->json([
+                'jobs'  => $jobs,
+                'count' => $jobs->count(),
+            ]);
+        }
+
+        $queryTerms = array_map('strtolower', explode(' ', $query));
+        $totalDocs = $jobs->count();
+
+        // Average document length
+        $avgDocLen = $jobs->avg(fn($job) => str_word_count(strtolower($job->title . ' ' . $job->description . ' ' . implode(' ', $job->skills ?? []))));
+
+        // Document frequency (DF) for each term
+        $df = [];
+        foreach ($queryTerms as $term) {
+            $df[$term] = $jobs->filter(function ($job) use ($term) {
+                $text = strtolower($job->title . ' ' . $job->description . ' ' . implode(' ', $job->skills ?? []));
+                $words = str_word_count($text, 1);
+                return in_array($term, $words);
+            })->count();
+        }
+
+        $jobScores = [];
+
+        foreach ($jobs as $job) {
+            $text = strtolower($job->title . ' ' . $job->description . ' ' . implode(' ', $job->skills ?? []));
+            $words = str_word_count($text, 1);
+            $docLen = count($words);
+            $score = 0;
+
+            // BM25 TF/IDF scoring
+            foreach ($queryTerms as $term) {
+                $tf = count(array_keys($words, $term)); // exact match in full text
+
+                // Title matches get double weight
+                $titleWords = str_word_count(strtolower($job->title), 1);
+                $tf += 2 * count(array_keys($titleWords, $term));
+
+                if ($tf == 0) continue;
+
+                $idf = log(($totalDocs - max($df[$term], 1) + 0.5) / (max($df[$term], 1) + 0.5) + 1);
+                $tfComponent = ($tf * ($k + 1)) / ($tf + $k * (1 - $b + $b * ($docLen / max($avgDocLen, 1))));
+                $score += $idf * $tfComponent;
+            }
+
+            // Exact phrase bonus in title
+            if (str_contains(strtolower($job->title), strtolower($query))) {
+                $score += 10;
+            }
+
+            // Only include jobs that matched (score > 0)
+            if ($score > 0) {
+                // Recency boost for matched jobs
+                $daysSincePost = now()->diffInDays($job->start_date);
+                $score += max(0, (30 - $daysSincePost) * 0.2);
+
+                $jobScores[] = [
+                    'job' => $job,
+                    'score' => $score
+                ];
+            }
+        }
+
+        // Sort by score descending
+        usort($jobScores, fn($a, $b) => $b['score'] <=> $a['score']);
+
+        // Reindex and extract jobs
+        $rankedJobs = array_map(function ($item, $index) {
+            $job = $item['job'];
+            $job->bm25_score = round($item['score'], 2); // optional: show score
+            $job->rank = $index + 1; // rank starts from 1
+            return $job;
+        }, array_values($jobScores), array_keys($jobScores));
+
         return response()->json([
-            'jobs'  => $jobs,
-            'count' => $jobs->count(),
+            'jobs'  => $rankedJobs,
+            'count' => count($rankedJobs),
         ]);
     }
 }
