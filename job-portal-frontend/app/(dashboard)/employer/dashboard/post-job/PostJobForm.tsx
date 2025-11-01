@@ -17,11 +17,11 @@ type Department = {
     slug: string;  // or any identifier you use for value attribute
 };
 interface JobFormData {
-    title: string, department_id: string, location: string, type: string, min_experience: string, max_experience: string, salary_min: string, salary_max: string, description: string, responsibilities: string[], requirements: string[], qualifications: string[], skills: string[], applicationDeadline: string, startDate: string,
+    title: string, department_id: string, location: string, type: string, min_experience: string, max_experience: string, salary_min: string, salary_max: string, description: string, responsibilities: string[], requirements: string[], qualifications: string[], skills: string[], applicationDeadline: string, startDate: string, interview_stages: { name: string; description: string }[];
 }
 
 const initialFormData: JobFormData = {
-    title: "", department_id: "", location: "", type: "", min_experience: "", max_experience: "", salary_min: "", salary_max: "", description: "", responsibilities: [], requirements: [], qualifications: [], skills: [], applicationDeadline: "", startDate: "",
+    title: "", department_id: "", location: "", type: "", min_experience: "", max_experience: "", salary_min: "", salary_max: "", description: "", responsibilities: [], requirements: [], qualifications: [], skills: [], applicationDeadline: "", startDate: "", interview_stages: [{ name: "", description: "" }],
 }
 
 function PostJobForm({ mode }: JobFormProps) {
@@ -93,6 +93,26 @@ function PostJobForm({ mode }: JobFormProps) {
             fetchJob();
         }
     }, [mode, jobId, authToken]);
+    // ✅ Interview stage handlers
+    const addInterviewStage = () => {
+        setFormData({
+            ...formData,
+            interview_stages: [...formData.interview_stages, { name: "", description: "" }],
+        });
+    };
+
+    const removeInterviewStage = (index: number) => {
+        setFormData({
+            ...formData,
+            interview_stages: formData.interview_stages.filter((_, i) => i !== index),
+        });
+    };
+
+    const updateInterviewStage = (index: number, field: "name" | "description", value: string) => {
+        const updatedStages = [...formData.interview_stages];
+        updatedStages[index][field] = value;
+        setFormData({ ...formData, interview_stages: updatedStages });
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -300,6 +320,82 @@ function PostJobForm({ mode }: JobFormProps) {
                                 {expError && <p className="text-red-500 text-sm mt-1">{expError}</p>}
                             </div>
                         </div>
+                    </div>
+                </div>
+                {/* Interview Stages Section */}
+                <div className="bg-white rounded-lg shadow border">
+                    <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                            <Briefcase className="h-5 w-5" />
+                            Interview Stages
+                        </h2>
+                        {mode !== "view" && (
+                            <button
+                                type="button"
+                                onClick={addInterviewStage}
+                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                                <Plus className="h-4 w-4" /> Add Round
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        {formData.interview_stages.map((stage, index) => (
+                            <div
+                                key={index}
+                                className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative"
+                            >
+                                {mode !== "view" && formData.interview_stages.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeInterviewStage(index)}
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                )}
+
+                                <h4 className="font-semibold text-gray-800 mb-3">
+                                    Round {index + 1}
+                                </h4>
+
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Stage Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Technical Round"
+                                            value={stage.name}
+                                            onChange={(e) =>
+                                                updateInterviewStage(index, "name", e.target.value)
+                                            }
+                                            disabled={mode === "view"}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Description
+                                        </label>
+                                        <textarea
+                                            placeholder="e.g. Candidate will be tested on problem-solving and coding."
+                                            value={stage.description}
+                                            onChange={(e) =>
+                                                updateInterviewStage(index, "description", e.target.value)
+                                            }
+                                            disabled={mode === "view"}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
+                                            rows={2}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

@@ -25,6 +25,7 @@ class Job extends Model
         'skills',
         'application_deadline',
         'start_date',
+        'interview_stages',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class Job extends Model
         'requirements' => 'array',
         'qualifications' => 'array',
         'skills' => 'array',
+        'interview_stages' => 'array',
         'application_deadline' => 'date',
         'start_date' => 'date',
     ];

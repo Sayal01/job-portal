@@ -89,6 +89,9 @@ class JobController extends Controller
                 'skills.*' => 'string',
                 'applicationDeadline' => 'nullable|date',
                 'startDate' => 'nullable|date',
+                'interview_stages' => 'nullable|array',
+                'interview_stages.*.name' => 'required_with:interview_stages|string|max:255',
+                'interview_stages.*.description' => 'nullable|string',
             ]);
 
             $employer = auth()->user()->company;
@@ -113,6 +116,7 @@ class JobController extends Controller
                 'skills' => $validated['skills'] ?? [],
                 'application_deadline' => $validated['applicationDeadline'] ?? null,
                 'start_date' => $validated['startDate'] ?? null,
+                'interview_stages' => $validated['interview_stages'] ?? [],
             ]);
 
             return response()->json(['job' => $job->load('company', 'department'), 'status' => "ok"], 201);
@@ -166,7 +170,7 @@ class JobController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'department_id' => 'sometimes|nullable|exists:departments,id',
             'location' => 'sometimes|string|max:255',
@@ -186,7 +190,9 @@ class JobController extends Controller
             'skills.*' => 'string',
             'applicationDeadline' => 'nullable|date',
             'startDate' => 'nullable|date',
-
+            'interview_stages' => 'nullable|array',
+            'interview_stages.*.name' => 'required_with:interview_stages|string|max:255',
+            'interview_stages.*.description' => 'nullable|string',
         ]);
 
 
@@ -206,6 +212,7 @@ class JobController extends Controller
             'skills' => $request->skills ?? $job->skills,
             'application_deadline' => $request->applicationDeadline ?? $job->application_deadline,
             'start_date' => $request->startDate ?? $job->start_date,
+            'interview_stages' => $validated['interview_stages'] ?? $job->interview_stages,
         ]);
         return response()->json($job->load('company', 'department'));
     }

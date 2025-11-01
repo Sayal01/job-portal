@@ -336,7 +336,7 @@ export default function EmployerApplicationsPage() {
                                             </select>
                                         </div>
 
-                                        {(application.status === "shortlisted" || application.status === "in_interview") && (
+                                        {/* {(application.status === "shortlisted" || application.status === "in_interview") && (
                                             <button
                                                 onClick={() => openScheduleModal(application.id)}
                                                 className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
@@ -344,11 +344,11 @@ export default function EmployerApplicationsPage() {
                                                 <Calendar className="w-4 h-4" />
                                                 Schedule Interview
                                             </button>
-                                        )}
+                                        )} */}
                                     </div>
 
                                     {/* Interview Rounds */}
-                                    <div className="border-t border-gray-100 pt-6">
+                                    {/* <div className="border-t border-gray-100 pt-6">
                                         <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                             <Calendar className="w-5 h-5 text-blue-500" />
                                             Interview Rounds
@@ -392,7 +392,7 @@ export default function EmployerApplicationsPage() {
                                                 ))}
                                             </div>
                                         )}
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         ))}
@@ -426,7 +426,7 @@ export default function EmployerApplicationsPage() {
                     </div>
                 )}
 
-                {showModal && selectedApplicationId && (
+                {/* {showModal && selectedApplicationId && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
                             <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white">
@@ -482,7 +482,7 @@ export default function EmployerApplicationsPage() {
                             </div>
                         </div>
                     </div>
-                )}
+                )} */}
             </div>
         </main>
     )

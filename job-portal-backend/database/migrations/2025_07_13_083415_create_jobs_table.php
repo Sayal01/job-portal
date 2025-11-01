@@ -29,7 +29,7 @@ return new class extends Migration
             $table->json('requirements')->nullable();
             $table->json('qualifications')->nullable();
             $table->json('skills')->nullable();
-
+            $table->json('interview_stages')->nullable();
             $table->date('application_deadline')->nullable();
             $table->date('start_date')->nullable();
             $table->timestamps();

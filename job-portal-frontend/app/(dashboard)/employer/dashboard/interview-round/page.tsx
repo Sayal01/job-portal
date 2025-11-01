@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import axios from "axios"
 import Cookies from "js-cookie"
@@ -15,16 +14,26 @@ interface User {
     id: number
     email: string
     profile?: Profile
+    first_name: string
+    last_name: string
+}
+
+interface InterviewStage {
+    name: string
+    description: string
 }
 
 interface Job {
     id: number
     title: string
+    interview_stages: InterviewStage[]
 }
 
 interface InterviewRound {
     id: number
     round_number: number
+    round_name?: string
+    round_description?: string
     scheduled_at: string
     status: string
     interviewer_name?: string
@@ -38,6 +47,7 @@ interface Candidate {
     interviews: InterviewRound[]
 }
 
+// ----------------- UI Components -----------------
 const CustomButton = ({
     children,
     onClick,
@@ -55,20 +65,13 @@ const CustomButton = ({
 }) => {
     const baseClasses =
         "font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
-
     const variantClasses = {
         primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 shadow-md hover:shadow-lg",
         secondary: "bg-gray-100 hover:bg-gray-200 text-gray-800 focus:ring-gray-500",
         danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-md hover:shadow-lg",
         outline: "border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
     }
-
-    const sizeClasses = {
-        sm: "px-3 py-1.5 text-sm",
-        md: "px-4 py-2 text-sm",
-        lg: "px-6 py-3 text-base",
-    }
-
+    const sizeClasses = { sm: "px-3 py-1.5 text-sm", md: "px-4 py-2 text-sm", lg: "px-6 py-3 text-base" }
     const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
 
     return (
@@ -103,9 +106,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         scheduled: { bg: "bg-blue-100", text: "text-blue-800", icon: "📅" },
         pending: { bg: "bg-yellow-100", text: "text-yellow-800", icon: "⏳" },
     }
-
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
-
     return (
         <span
             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
@@ -133,6 +134,7 @@ const LoadingSkeleton = () => (
     </div>
 )
 
+// ----------------- Page -----------------
 export default function EmployerInterviewRoundsPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([])
     const [loading, setLoading] = useState(true)
@@ -141,6 +143,8 @@ export default function EmployerInterviewRoundsPage() {
     const [roundDate, setRoundDate] = useState("")
     const [interviewer, setInterviewer] = useState("")
     const [remarks, setRemarks] = useState("")
+    const [roundName, setRoundName] = useState("")
+    const [roundDescription, setRoundDescription] = useState("")
     const [isScheduling, setIsScheduling] = useState(false)
 
     const token = Cookies.get("AuthToken")
@@ -163,11 +167,22 @@ export default function EmployerInterviewRoundsPage() {
         fetchCandidates()
     }, [])
 
+    // ----------------- Modal -----------------
     const openScheduleModal = (candidateId: number) => {
         setSelectedCandidateId(candidateId)
         setRoundDate("")
         setInterviewer("")
         setRemarks("")
+
+        const candidate = candidates.find((c) => c.id === candidateId)
+        if (candidate) {
+            const lastRound = candidate.interviews[candidate.interviews.length - 1]
+            const nextRoundIndex = lastRound ? lastRound.round_number : 0
+            const nextStage = candidate.job.interview_stages[nextRoundIndex]
+            setRoundName(nextStage?.name || `Round ${nextRoundIndex + 1}`)
+            setRoundDescription(nextStage?.description || "")
+        }
+
         setShowModal(true)
     }
 
@@ -190,7 +205,9 @@ export default function EmployerInterviewRoundsPage() {
                 {
                     scheduled_at: roundDate,
                     interviewer_name: interviewer,
-                    remarks: remarks,
+                    remarks,
+                    round_name: roundName,
+                    round_description: roundDescription,
                 },
                 { headers: { Authorization: `Bearer ${token}` } },
             )
@@ -219,6 +236,7 @@ export default function EmployerInterviewRoundsPage() {
         }
     }
 
+    // ----------------- Render -----------------
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
             <div className="max-w-7xl mx-auto mb-8">
@@ -239,45 +257,58 @@ export default function EmployerInterviewRoundsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {candidates.map((candidate) => (
-                            <CustomCard key={candidate.id} className="h-fit">
-                                <CardHeader>
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <h2 className="text-xl font-bold text-gray-900 mb-1">
-                                                {candidate.user.profile?.full_name || candidate.user.email}
-                                            </h2>
-                                            <p className="text-blue-600 font-medium">{candidate.job.title}</p>
-                                        </div>
-                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                            {(candidate.user.profile?.full_name || candidate.user.email).charAt(0).toUpperCase()}
-                                        </div>
-                                    </div>
-                                </CardHeader>
+                        {candidates.map((candidate) => {
+                            const nextRoundIndex = candidate.interviews.length
+                            const nextStage = candidate.job.interview_stages[nextRoundIndex]
 
-                                <CardContent>
-                                    {candidate.interviews.length === 0 ? (
-                                        <div className="text-center py-6">
-                                            <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
-                                                <span className="text-2xl">📅</span>
+                            return (
+                                <CustomCard key={candidate.id} className="h-fit">
+                                    <CardHeader>
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                                                    {candidate.user.profile?.full_name || candidate.user.email}
+                                                </h2>
+                                                <p className="text-blue-600 font-medium">{candidate.job.title}</p>
+                                                <p className="text-gray-500 text-sm">
+                                                    Total Rounds: {candidate.interviews.length}/{candidate.job.interview_stages.length}
+                                                </p>
+                                                {nextStage && (
+                                                    <p className="text-gray-500 text-sm mt-1">
+                                                        Next Round: {nextStage.name}
+                                                    </p>
+                                                )}
                                             </div>
-                                            <p className="text-gray-600 mb-4">No interviews scheduled yet</p>
-                                            <CustomButton onClick={() => openScheduleModal(candidate.id)}>
-                                                Schedule First Interview
-                                            </CustomButton>
+                                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                                {(candidate.user.profile?.full_name || candidate.user.email).charAt(0).toUpperCase()}
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <div>
-                                            <div className="flex items-center justify-between mb-4">
-                                                <h3 className="font-semibold text-gray-900">Interview Rounds</h3>
-                                                <span className="text-sm text-gray-500">{candidate.interviews.length} round(s)</span>
-                                            </div>
+                                    </CardHeader>
 
+                                    <CardContent>
+                                        {candidate.interviews.length === 0 ? (
+                                            <div className="text-center py-6">
+                                                <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
+                                                    <span className="text-2xl">📅</span>
+                                                </div>
+                                                <p className="text-gray-600 mb-4">No interviews scheduled yet</p>
+                                                <CustomButton onClick={() => openScheduleModal(candidate.id)}>
+                                                    Schedule First Interview
+                                                </CustomButton>
+                                            </div>
+                                        ) : (
                                             <div className="space-y-3">
                                                 {candidate.interviews.map((round) => (
                                                     <div key={round.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                                         <div className="flex items-center justify-between mb-3">
-                                                            <span className="font-medium text-gray-900">Round {round.round_number}</span>
+                                                            <div>
+                                                                <span className="font-medium text-gray-900">
+                                                                    {round.round_name || `Round ${round.round_number}`}
+                                                                </span>
+                                                                {round.round_description && (
+                                                                    <p className="text-sm text-gray-500">{round.round_description}</p>
+                                                                )}
+                                                            </div>
                                                             <StatusBadge status={round.status} />
                                                         </div>
 
@@ -317,7 +348,7 @@ export default function EmployerInterviewRoundsPage() {
                                                     </div>
                                                 ))}
 
-                                                {(candidate.interviews.length < 3 &&
+                                                {(candidate.interviews.length < candidate.job.interview_stages.length &&
                                                     (candidate.interviews.length === 0 ||
                                                         candidate.interviews[candidate.interviews.length - 1].status === "passed")) && (
                                                         <div className="pt-2">
@@ -330,23 +361,24 @@ export default function EmployerInterviewRoundsPage() {
                                                             </CustomButton>
                                                         </div>
                                                     )}
-
                                             </div>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </CustomCard>
-                        ))}
+                                        )}
+                                    </CardContent>
+                                </CustomCard>
+                            )
+                        })}
                     </div>
                 )}
             </div>
 
+            {/* Modal */}
             {showModal && selectedCandidateId && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-100">
                             <h3 className="text-xl font-bold text-gray-900">Schedule Interview Round</h3>
-                            <p className="text-gray-600 mt-1">Set up a new interview for this candidate</p>
+                            <p className="text-gray-600 mt-1">{roundName}</p>
+                            {roundDescription && <p className="text-gray-500 text-sm mt-1">{roundDescription}</p>}
                         </div>
 
                         <div className="p-6 space-y-4">
