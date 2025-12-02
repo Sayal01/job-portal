@@ -51,85 +51,103 @@ class JobInterviewController extends Controller
      */
     public function store(Request $request, $applicationId)
     {
-        $application = Application::with('interviews', 'user', 'job.company')->findOrFail($applicationId);
-        $job = $application->job;
+        try {
+            $application = Application::with('interviews', 'user', 'job.company')->findOrFail($applicationId);
+            $job = $application->job;
 
-        // Get dynamic interview stages from the job
-        $stages = $job->interview_stages ?? [];
-        $maxRounds = count($stages);
+            // Get dynamic interview stages from the job
+            $stages = $job->interview_stages ?? [];
+            $maxRounds = count($stages);
 
-        if ($maxRounds === 0) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No interview stages defined for this job.'
-            ], 400);
-        }
+            if ($maxRounds === 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No interview stages defined for this job.'
+                ], 400);
+            }
 
-        $lastRound = $application->interviews()->latest('round_number')->first();
-        $roundNumber = $lastRound ? $lastRound->round_number + 1 : 1;
+            $lastRound = $application->interviews()->latest('round_number')->first();
+            $roundNumber = $lastRound ? $lastRound->round_number + 1 : 1;
 
-        // Check if maximum rounds reached
-        if ($roundNumber > $maxRounds) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Maximum interview rounds reached.'
-            ], 400);
-        }
+            // Check if maximum rounds reached
+            if ($roundNumber > $maxRounds) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Maximum interview rounds reached.'
+                ], 400);
+            }
 
-        // Check if previous round is passed
-        if ($lastRound && $lastRound->status !== 'passed') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Cannot schedule next round until the previous round is passed.'
-            ], 400);
-        }
+            // Check if previous round is passed
+            if ($lastRound && $lastRound->status !== 'passed') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot schedule next round until the previous round is passed.'
+                ], 400);
+            }
 
-        // Get round name & description
-        $currentStage = $stages[$roundNumber - 1] ?? ['name' => "Round $roundNumber", 'description' => null];
+            // Get round name & description
+            $currentStage = $stages[$roundNumber - 1] ?? ['name' => "Round $roundNumber", 'description' => null];
 
-        // Create new interview
-        $interview = $application->interviews()->create([
-            'round_number' => $roundNumber,
-            'status' => 'scheduled',
-            'scheduled_at' => $request->scheduled_at,
-            'interviewer_name' => $request->interviewer_name,
-            'remarks' => $currentStage['description'] ?? $request->remarks,
-        ]);
-
-        // Update application status if first interview
-        if ($application->status === 'shortlisted') {
-            $application->update(['status' => 'in_interview']);
-        }
-
-        // Notification & email (same as before)
-        $candidate = $application->user;
-        $employerEmail = $job->company->employer->email;
-        Notification::create([
-            'user_id' => $candidate->id,
-            'type' => 'interview_scheduled',
-            'data' => [
-                'job_title' => $job->title,
+            // Create new interview
+            $interview = $application->interviews()->create([
                 'round_number' => $roundNumber,
-                'round_name' => $currentStage['name'],
+                'status' => 'scheduled',
                 'scheduled_at' => $request->scheduled_at,
                 'interviewer_name' => $request->interviewer_name,
-            ],
-            'read' => false,
-        ]);
+                'remarks' => $currentStage['description'] ?? $request->remarks,
+            ]);
 
-        Mail::to($candidate->email)->send(new InterviewScheduledMail(
-            $candidate->first_name . ' ' . $candidate->last_name,
-            $job->title,
-            \Carbon\Carbon::parse($request->scheduled_at)->format('Y-m-d'),
-            \Carbon\Carbon::parse($request->scheduled_at)->format('H:i A'),
-            $employerEmail
-        ));
+            // Update application status if first interview
+            if ($application->status === 'shortlisted') {
+                $application->update(['status' => 'in_interview']);
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Interview round created successfully',
-            'data' => $interview
-        ]);
+            // Notification
+            $candidate = $application->user;
+            $employerEmail = $job->company->employer->email ?? null;
+
+            Notification::create([
+                'user_id' => $candidate->id,
+                'type' => 'interview_scheduled',
+                'data' => [
+                    'job_title' => $job->title,
+                    'round_number' => $roundNumber,
+                    'round_name' => $currentStage['name'],
+                    'scheduled_at' => $request->scheduled_at,
+                    'interviewer_name' => $request->interviewer_name,
+                ],
+                'read' => false,
+            ]);
+
+            // Wrap email sending in try-catch
+            try {
+                if ($employerEmail) {
+                    Mail::to($candidate->email)->send(new InterviewScheduledMail(
+                        $candidate->first_name . ' ' . $candidate->last_name,
+                        $job->title,
+                        \Carbon\Carbon::parse($request->scheduled_at)->format('Y-m-d'),
+                        \Carbon\Carbon::parse($request->scheduled_at)->format('H:i A'),
+                        $employerEmail
+                    ));
+                }
+            } catch (\Exception $e) {
+                // Log the email error but don't fail the request
+                \Log::error('Failed to send interview email: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Interview round created successfully',
+                'data' => $interview
+            ]);
+        } catch (\Exception $e) {
+            // Catch any unexpected errors
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create interview round',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 
@@ -150,7 +168,7 @@ class JobInterviewController extends Controller
             ->whereHas('job', function ($q) use ($employer) {
                 $q->where('company_id', $employer->id);
             })
-            ->whereIn('status', ['shortlisted', 'in_interview', 'failed']) // include candidates in interview too
+            ->whereIn('status', ['shortlisted', 'in_interview', 'rejected']) // include candidates in interview too
             ->get();
 
         return response()->json($candidates);

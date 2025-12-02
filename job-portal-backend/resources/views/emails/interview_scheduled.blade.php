@@ -7,7 +7,7 @@
 
 <body>
     <h2>Hello {{ $candidateName }},</h2>
-    <p>Your interview for the position of <strong>{{ $jobTitle }}</strong> has been scheduled.</p>
+    <p>Your interview for the position of <strong>{{ $jobTitle }}</strong> has been scheduled at following time listed below.</p>
     <p><strong>Date:</strong> {{ $interviewDate }}</p>
     <p><strong>Time:</strong> {{ $interviewTime }}</p>
 
