@@ -12,7 +12,8 @@ class Company extends Model
         'company_name',
         'description',
         'website',
-        'logo'
+        'logo',
+        'is_verified'
     ];
 
     public function employer()

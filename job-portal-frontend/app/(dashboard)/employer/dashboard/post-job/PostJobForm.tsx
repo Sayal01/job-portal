@@ -119,9 +119,9 @@ function PostJobForm({ mode }: JobFormProps) {
         if (mode === "view") return;
         setIsSubmitting(true)
         try {
-
+            let response
             if (mode === "add") {
-                const response = await axios.post(`${API_URL}/jobs`, formData, {
+                response = await axios.post(`${API_URL}/jobs`, formData, {
                     headers: {
                         Authorization: `Bearer ${authToken}`, // <-- add token here
                         "Content-Type": "application/json",
@@ -129,7 +129,7 @@ function PostJobForm({ mode }: JobFormProps) {
                 })
                 console.log(response)
             } else if (mode === "edit" && jobId) {
-                const response = await axios.put(`${API_URL}/jobs/${jobId}`, formData, {
+                response = await axios.put(`${API_URL}/jobs/${jobId}`, formData, {
                     headers: {
                         Authorization: `Bearer ${authToken}`, // <-- add token here
                         "Content-Type": "application/json",
@@ -137,26 +137,34 @@ function PostJobForm({ mode }: JobFormProps) {
                 })
                 console.log(response)
             }
-
-
-        }
-        catch (error) {
-            console.error("error ", error)
-        } finally {
-            setIsSubmitting(false)
+            if (response?.data?.status === false) {
+                alert(response.data.message || "Something went wrong.");
+                return; // stop here (no success actions)
+            }
+            alert("Job posted successfully!")
             console.log("Job posted:", formData)
             router.back()
         }
-        // Simulate API call
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-        alert("Job posted successfully!")
-        // router.push("/dashboard/my-jobs")
+        catch (error: any) {
+            if (error.response?.status === 403) {
+                alert(error.response.data.message || "Access denied");
+                return;
+            }
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert("An unexpected error occurred");
+            }
+            console.error("Error posting job:", error);
+        }
+        finally {
+            setIsSubmitting(false)
+
+
+        }
+
     }
 
-    // const handleSaveDraft = () => {
-    //     console.log("Draft saved:", formData)
-    //     alert("Draft saved successfully!")
-    // }
 
     return (
         <div className="space-y-8">

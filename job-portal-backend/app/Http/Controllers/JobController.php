@@ -99,6 +99,13 @@ class JobController extends Controller
             if (!$employer) {
                 return response()->json(['error' => 'Only employers can create jobs'], 403);
             }
+            // **Check if company is verified**
+            if (!$employer->is_verified) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Your company is not verified. You cannot post jobs.'
+                ], 403);
+            }
 
             $job = $employer->jobs()->create([
                 'title' => $validated['title'],

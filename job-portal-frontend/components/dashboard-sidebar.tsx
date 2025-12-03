@@ -27,7 +27,7 @@ const sidebarItems = {
         { title: "users", href: "/admin/dashboard/users", icon: FileText },
         { title: "Applications", href: "/admin/dashboard/application-list", icon: Users },
         { title: "Departments", href: "/admin/dashboard/department-list", icon: BarChart3 },
-        { title: "Add Admin", href: "/admin/dashboard/create-admin", icon: Users },
+        { title: "verify Company", href: "/admin/dashboard/company", icon: Users },
         { title: "Settings", href: "/account", icon: Settings },
     ],
     "job_seeker": [

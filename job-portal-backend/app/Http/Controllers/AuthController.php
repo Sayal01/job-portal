@@ -34,6 +34,7 @@ class AuthController extends Controller
                     'user_id' => $user->id,
                     'company_name' => $data['company_name'],
                     'description' => null,
+                    'is_verified' => false,
                     'website' => null,
                 ]);
             }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('website')->nullable();
             $table->string('logo')->nullable();
+            $table->boolean('is_verified')->default(false);
             $table->timestamps();
         });
     }

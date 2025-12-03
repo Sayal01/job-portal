@@ -176,7 +176,7 @@ export function Header() {
 
                                 {/* ✅ Post Job only for employer after auth */}
                                 {localUser?.role === "employer" && (
-                                    <Button size="sm" onClick={() => router.push("/employer/jobs/create")}>
+                                    <Button size="sm" onClick={() => router.push("/employer/dashboard/post-job")}>
                                         <Plus className="h-4 w-4 mr-2" />
                                         Post Job
                                     </Button>

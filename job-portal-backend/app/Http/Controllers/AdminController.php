@@ -125,12 +125,63 @@ class AdminController extends Controller
             'users' => $users
         ]);
     }
-    public function listCompanies()
+    // public function listCompanies()
+    // {
+    //     $companies = Company::with('employer')->get();
+
+    //     return response()->json([
+    //         'companies' => $companies,
+    //     ]);
+    // }
+    // List companies with optional filter
+    public function listCompanies(Request $request)
     {
-        $companies = Company::with('employer')->get();
+        // Start query and eager load the employer relationship
+        $query = Company::with('employer');
+
+        // Apply optional filter by verification status
+        if ($request->has('is_verified')) {
+            // Convert string to boolean if needed
+            $isVerified = filter_var($request->is_verified, FILTER_VALIDATE_BOOLEAN);
+            $isVerified = filter_var($request->is_verified, FILTER_VALIDATE_BOOLEAN);
+            $query->where('is_verified', $isVerified);
+        }
+
+        // Get the results
+        $companies = $query->get();
 
         return response()->json([
-            'companies' => $companies,
+            'status' => 'success',
+            'data' => $companies,
+        ]);
+    }
+
+
+    // Verify a company
+    public function verifyCompany($companyId)
+    {
+        $company = Company::findOrFail($companyId);
+        $company->is_verified = true;
+        $company->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Company verified successfully',
+            'data' => $company,
+        ]);
+    }
+
+    // Revoke verification
+    public function unverifyCompany($companyId)
+    {
+        $company = Company::findOrFail($companyId);
+        $company->is_verified = false;
+        $company->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Company verification revoked',
+            'data' => $company,
         ]);
     }
 

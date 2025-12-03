@@ -40,6 +40,8 @@ Route::middleware(['auth:sanctum', 'can:admin'])->prefix('admin')->group(functio
     Route::get('/users', [AdminController::class, 'listUsers']);
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
     Route::get('/companies', [AdminController::class, 'listCompanies']);
+    Route::post('/companies/{id}/verify', [AdminController::class, 'verifyCompany']);
+    Route::post('/companies/{id}/unverify', [AdminController::class, 'unverifyCompany']);
     Route::delete('/companies/{id}', [AdminController::class, 'deleteCompany']);
     Route::get('/applications', [AdminController::class, 'listApplications']);
     Route::post('/departments/add', [DepartmentController::class, 'store']);
