@@ -706,7 +706,7 @@ function PostJobForm({ mode }: JobFormProps) {
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Expected Start Date</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
                                 <input
                                     type="date"
                                     value={formData.startDate}
@@ -757,7 +757,7 @@ function PostJobForm({ mode }: JobFormProps) {
                         onClick={() => router.back()}
                         className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                     >
-                        Cancel
+                        back
                     </button>
                     {
                         mode !== "view" && (

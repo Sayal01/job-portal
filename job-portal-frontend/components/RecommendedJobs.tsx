@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation"; // import useRoute
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +42,7 @@ export default function RecommendedJobs() {
     const [recommendations, setRecommendations] = useState<JobRecommendation[]>([]);
     const [loading, setLoading] = useState(true);
     const authToken = Cookies.get("AuthToken");
-
+    const router = useRouter(); 
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
@@ -77,7 +77,7 @@ export default function RecommendedJobs() {
     return (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recommendations.slice(0, 6).map((rec) => (
-                <Card key={rec.job.id} className="hover:shadow-lg transition">
+                <Card key={rec.job.id} className="hover:shadow-lg transition" onClick={() => router.push(`/jobs/${rec.job.id}`)}> 
                     <CardHeader>
                         <CardTitle className="text-lg">{rec.job.title}</CardTitle>
                         <p className="text-sm text-muted-foreground">

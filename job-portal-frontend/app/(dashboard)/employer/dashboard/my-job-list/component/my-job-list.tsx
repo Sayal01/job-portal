@@ -203,11 +203,11 @@ export function MyJobsList() {
                                                                 <span className="text-lg font-bold text-gray-900">{job.applications_count}</span>
                                                                 <span className="text-sm text-gray-600">applications</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2">
+                                                            {/* <div className="flex items-center gap-2">
                                                                 <Eye className="h-5 w-5 text-green-500" />
                                                                 <span className="text-lg font-bold text-gray-900">{job.views}</span>
                                                                 <span className="text-sm text-gray-600">views</span>
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                     </div>
                                                 </div>

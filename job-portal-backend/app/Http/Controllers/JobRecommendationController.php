@@ -15,12 +15,12 @@ class JobRecommendationController extends Controller
         $totalMonths = 0;
 
         foreach ($workExperiences as $exp) {
-            // Skip if start date missing
+            
             if (empty($exp['start_date'])) {
                 continue;
             }
 
-            // Parse start and end dates safely
+            
             try {
                 $start = Carbon::createFromFormat('Y-m-d', $exp['start_date']);
             } catch (\Exception $e) {
@@ -37,26 +37,25 @@ class JobRecommendationController extends Controller
                 $end = Carbon::now();
             }
 
-            // Skip if end is before start
+            
             if ($end < $start) {
                 continue;
             }
 
-            // Calculate months difference
-            $months = $end->diffInMonths($start, false); // false allows negative
-            $months = abs($months); // ensure positive
+            $months = $end->diffInMonths($start, false); 
+            $months = abs($months); 
             $totalMonths += $months;
         }
 
-        // Convert to years with 2 decimals
+        
         return round($totalMonths / 12, 2);
     }
 
 
-    // Calculate content-based score
+    
     private function contentBasedScore(array $candidate, array $job): array
     {
-        // Skills
+        
         $candidateSkills = array_map('strtolower', $candidate['skills'] ?? []);
         $jobSkills = array_map('strtolower', $job['skills'] ?? []);
         $allSkills = array_unique(array_merge($candidateSkills, $jobSkills));
@@ -88,7 +87,7 @@ class JobRecommendationController extends Controller
         // Experience score
         $candidateExp = $this->calculateTotalExperience($candidate['work_experiences'] ?? []);
 
-        // error_log('Candidate total experience: ' . $candidateExp);
+       
 
         $minExp = $job['min_experience'] ?? 0;
         $maxExp = $job['max_experience'] ?? 0;
@@ -96,16 +95,16 @@ class JobRecommendationController extends Controller
         $maxExpForCalc = max($maxExp, 1);
 
         if ($candidateExp < $minExp) {
-            // Below minimum: proportional score
+          
             $experienceScore = max(0, $candidateExp / $minExp);
             $experienceReason = "Candidate experience (" . round($candidateExp, 2) . " yrs) below job minimum ({$minExp} yrs)";
         } elseif ($candidateExp >= $minExp && $candidateExp <= $maxExp) {
-            // Within range: score increases linearly towards maxExpForCalc
+           
             $experienceScore = 0.7 + 0.3 * (($candidateExp - $minExp) / max($maxExp - $minExp, 1));
             $experienceReason = null;
         } else {
-            // Above max: full score (or slightly bonus capped at 1.1 if you want)
-            $experienceScore = 1; // or min(1.1, 1 + ($candidateExp - $maxExp)/$maxExp)
+           
+            $experienceScore = 1; 
             $experienceReason = "Candidate experience (" . round($candidateExp, 2) . " yrs) above job maximum ({$maxExp} yrs)";
         }
 
@@ -156,7 +155,7 @@ class JobRecommendationController extends Controller
         ];
     }
 
-    // API: recommend jobs
+    
     public function recommendJobs(Request $request, $profile_id = null)
     {
         $user = $request->user();
@@ -184,14 +183,14 @@ class JobRecommendationController extends Controller
             error_log("Experience for {$exp['company']}: {$months} months");
         }
 
-        // Candidate object
+    
         $candidate = [
             'skills' => $profile->skills ?? [],
             'preferred_role' => $profile->preferred_role ?? '',
             'work_experiences' => $workExperiences
         ];
 
-        // Active jobs
+    
         $today = Carbon::today()->toDateString();
         $jobsQuery = Job::where('application_deadline', '>=', $today);
         if ($request->has('type')) $jobsQuery->where('type', $request->input('type'));
@@ -226,7 +225,7 @@ class JobRecommendationController extends Controller
         // Keep only jobs with score >= 0.5
         $results = array_filter($results, fn($job) => $job['score'] >= 0.5);
 
-        // Reindex array after filtering
+      
         $results = array_values($results);
 
         return response()->json([

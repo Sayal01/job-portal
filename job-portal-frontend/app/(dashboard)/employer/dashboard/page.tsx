@@ -185,7 +185,7 @@ function EmployerDashboard() {
                     </div>
 
                     {/* Quick Actions */}
-                    <Card className="mt-8">
+                    {/* <Card className="mt-8">
                         <CardHeader>
                             <CardTitle>Quick Actions</CardTitle>
                         </CardHeader>
@@ -209,7 +209,7 @@ function EmployerDashboard() {
                                 </Button>
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </main>
             </div>
         </div>

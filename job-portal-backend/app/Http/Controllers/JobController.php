@@ -18,8 +18,8 @@ class JobController extends Controller
 
 
             $jobs = Job::with('company', 'department')
-                ->whereDate('start_date', '<=', $today)
-                ->whereDate('application_deadline', '>=', $today)
+                // ->whereDate('start_date', '<=', $today)
+                // ->whereDate('application_deadline', '>=', $today)
                 ->latest()
                 ->get();
             return response()->json([
@@ -306,35 +306,7 @@ class JobController extends Controller
         ]);
     }
 
-    // public function search(Request $request)
-    // {
-    //     $query    = $request->input('q');        // keyword
-    //     $location = $request->input('location'); // location filter
-    //     $type     = $request->input('type');     // job type filter
-
-    //     $jobs = Job::query()
-    //         ->when($query, function ($q) use ($query) {
-    //             $q->where(function ($sub) use ($query) {
-    //                 $sub->where('title', 'LIKE', "%{$query}%")
-    //                     ->orWhere('description', 'LIKE', "%{$query}%")
-    //                     ->orWhere('location', 'LIKE', "%{$query}%");
-    //             });
-    //         })
-    //         ->when($location, function ($q) use ($location) {
-    //             $q->where('location', 'LIKE', "%{$location}%");
-    //         })
-    //         ->when($type, function ($q) use ($type) {
-    //             $q->where('type', $type);
-    //         })
-    //         ->with(['company', 'department'])
-    //         ->get();
-
-    //     return response()->json([
-    //         'jobs'  => $jobs,
-    //         'count' => $jobs->count(),
-    //     ]);
-    // }
-
+  
 
     public function search(Request $request)
     {
